@@ -1,0 +1,31 @@
+name: Run MLB Matchup Bot
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # Every day at 10:00 AM ET (14:00 UTC)
+  workflow_dispatch:      # Optional: lets you manually trigger from GitHub
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    env:
+      CONSUMER_KEY: ${{ secrets.CONSUMER_KEY }}
+      CONSUMER_SECRET: ${{ secrets.CONSUMER_SECRET }}
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run bot script
+        run: python bot.py

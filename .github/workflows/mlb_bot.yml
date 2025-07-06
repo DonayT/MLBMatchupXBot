@@ -29,3 +29,6 @@ jobs:
 
       - name: Run bot script
         run: python bot.py
+
+      - name: Run Practice File
+        run: python practice.py

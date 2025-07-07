@@ -7,10 +7,17 @@ consumer_secret = os.environ.get("CONSUMER_SECRET")
 access_token = os.environ.get("ACCESS_TOKEN")
 access_token_secret = os.environ.get("ACCESS_TOKEN_SECRET")
 
-print(consumer_key)
-print(consumer_secret)
-print(access_token)
-print(access_token_secret)
+required_vars = {
+    "CONSUMER_KEY": consumer_key,
+    "CONSUMER_SECRET": consumer_secret,
+    "ACCESS_TOKEN": access_token,
+    "ACCESS_TOKEN_SECRET": access_token_secret
+}
+
+for name, value in required_vars.items():
+    if not value:
+        raise EnvironmentError(f"Missing environment variable: {name}")
+
 
 # Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote Tweets, Tweet with reply settings, and Tweet to Super Followers in addition to other features.
 payload = {"text": "Hello world!"}

@@ -18,6 +18,14 @@ for name, value in required_vars.items():
     if not value:
         raise EnvironmentError(f"Missing environment variable: {name}")
 
+# Make the request
+oauth = OAuth1Session(
+    consumer_key,
+    client_secret=consumer_secret,
+    resource_owner_key=access_token,
+    resource_owner_secret=access_token_secret,
+)
+
 # Opens Image and assigns it to media id
 with open("ExampleLineup.png", "rb") as image_file:
     files = {"media": image_file}
@@ -36,14 +44,6 @@ payload = {
             "media_ids": [media_id]
         }
     }
-
-# Make the request
-oauth = OAuth1Session(
-    consumer_key,
-    client_secret=consumer_secret,
-    resource_owner_key=access_token,
-    resource_owner_secret=access_token_secret,
-)
 
 # Making the request
 response = oauth.post(

@@ -27,7 +27,7 @@ oauth = OAuth1Session(
 )
 
 # Opens Image and assigns it to media id
-with open("ExampleLineup.png", "rb") as image_file:
+with open("ExampleLineup2.png", "rb") as image_file:
     files = {"media": image_file}
     upload_url = "https://upload.twitter.com/1.1/media/upload.json"
     response = oauth.post(upload_url, files=files)

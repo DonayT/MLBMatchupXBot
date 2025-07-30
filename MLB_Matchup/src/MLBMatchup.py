@@ -13,7 +13,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from date_organizer import check_date_transition, organize_existing_images
 
 class GameQueue:
-    def __init__(self, queue_file="data/processed_games.json"):
+    def __init__(self, queue_file=None):
+        if queue_file is None:
+            # Get the directory where this script is located
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            # Go up one level to the MLB_Matchup directory, then to data
+            queue_file = os.path.join(script_dir, "..", "data", "processed_games.json")
         self.queue_file = queue_file
         self.processed_games = self.load_processed_games()
     

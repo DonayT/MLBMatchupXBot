@@ -28,10 +28,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Practice File
-        run: python connectionCheck.py
+        run: python Xbot/connectionCheck.py
 
       - name: Run bot script
-        run: python bot.py
+        run: python Xbot/bot.py
 
       - name: Run Practice Lineup
-        run: python MLBMatchup.py
+        run: python MLB_Matchup/src/MLBMatchup.py

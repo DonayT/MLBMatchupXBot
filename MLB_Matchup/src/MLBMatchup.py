@@ -114,7 +114,7 @@ def process_games():
     today = datetime.now().strftime('%Y-%m-%d')
     
     # Check for date transition and organize images
-    print("🔄 Checking date organization...")
+    print("Checking date organization...")
     date_changed = check_date_transition()
     organize_existing_images()
     print()
@@ -128,15 +128,15 @@ def process_games():
     # Get only unprocessed games
     unprocessed_games = game_queue.get_unprocessed_games(schedule)
     
-    print(f"📅 Processing {len(unprocessed_games)} unprocessed games for {today}")
-    print(f"📋 Total games today: {len(schedule)}")
-    print(f"✅ Already processed: {len(schedule) - len(unprocessed_games)}")
+    print(f"Processing {len(unprocessed_games)} unprocessed games for {today}")
+    print(f"Total games today: {len(schedule)}")
+    print(f"Already processed: {len(schedule) - len(unprocessed_games)}")
     print()
     
     # Check if all games are processed
     if len(unprocessed_games) == 0:
-        print("🎉 All games for today have been processed!")
-        print("🏁 No more games to check - all lineups are complete!")
+        print("All games for today have been processed!")
+        print("No more games to check - all lineups are complete!")
         return "ALL_DONE"
     
     for game in unprocessed_games:
@@ -148,7 +148,7 @@ def process_games():
         print(f"   Lineups Official: {game_data['lineups_official']}")
         
         if game_data['lineups_official']:
-            print("  ✅ Both lineups are official - generating image!")
+            print("  Both lineups are official - generating image!")
             
             # Generate Twitter image
             try:

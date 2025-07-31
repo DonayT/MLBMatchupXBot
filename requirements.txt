@@ -1,3 +1,5 @@
 requests
 requests_oauthlib
 python-dotenv
+MLB-StatsAPI
+Pillow

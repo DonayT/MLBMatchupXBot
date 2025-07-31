@@ -18,7 +18,6 @@ for name, value in required_vars.items():
     if not value:
         raise EnvironmentError(f"Missing environment variable: {name}")
 
-
 # Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote Tweets, Tweet with reply settings, and Tweet to Super Followers in addition to other features.
 payload = {"text": "Hello world!"}
 

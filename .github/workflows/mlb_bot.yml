@@ -2,7 +2,7 @@ name: Run MLB Matchup Bot
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # Every day at 10:00 AM ET (14:00 UTC)
+    - cron: '*/15 * * * *'  # Every 15 minutes
   workflow_dispatch:      # Optional: lets you manually trigger from GitHub
 
 jobs:

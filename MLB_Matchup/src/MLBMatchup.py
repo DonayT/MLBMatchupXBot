@@ -75,12 +75,29 @@ def get_game_data(game):
     home_pitcher = game.get('home_probable_pitcher') or 'TBD'
     away_pitcher = game.get('away_probable_pitcher') or 'TBD'
     
+    # Get game date and time
+    game_datetime = game.get('game_datetime', '')
+    game_date = game.get('game_date', '')
+    
+    # Format the date and time
+    if game_datetime:
+        try:
+            # Parse the datetime string and format it
+            from datetime import datetime
+            dt = datetime.fromisoformat(game_datetime.replace('Z', '+00:00'))
+            formatted_datetime = dt.strftime('%m/%d/%Y %I:%M %p ET')
+        except:
+            formatted_datetime = game_date if game_date else 'TBD'
+    else:
+        formatted_datetime = game_date if game_date else 'TBD'
+    
     game_data = {
         'game_id': game_id,
         'home_team': home,
         'away_team': away,
         'home_pitcher': home_pitcher,
         'away_pitcher': away_pitcher,
+        'game_datetime': formatted_datetime,
         'home_lineup': [],
         'away_lineup': [],
         'lineups_official': are_lineups_official(boxscore)
@@ -115,13 +132,13 @@ def upload_image_to_twitter(image_path, game_data):
     try:
         with open("MLB_Matchup/data/teamHashtags.json", "r") as f:
             teamHashtags = json.load(f)
-        # Create tweet text with game information
+        # Create tweet text with game information in the desired format
         away_hashtag = teamHashtags.get(game_data['away_team'], f"#{game_data['away_team'].replace(' ', '')}")
         home_hashtag = teamHashtags.get(game_data['home_team'], f"#{game_data['home_team'].replace(' ', '')}")
-        tweet_text = f"{away_hashtag} @ {home_hashtag}\n"
-        tweet_text += f"Home SP: {game_data['home_pitcher']}\n"
-        tweet_text += f"Away SP: {game_data['away_pitcher']}\n"
-        tweet_text += "#MLB #Baseball"
+        
+        tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
+        tweet_text += f"{game_data['game_datetime']}\n"
+        tweet_text += f"{away_hashtag} {home_hashtag}"
         
         # Call bot.py with the image path and tweet text
         # We'll need to modify bot.py to accept command line arguments

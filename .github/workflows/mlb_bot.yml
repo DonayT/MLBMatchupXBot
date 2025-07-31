@@ -35,3 +35,26 @@ jobs:
 
       - name: Run Practice Lineup
         run: python MLB_Matchup/src/MLBMatchup.py
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Stage only specific folders
+        run: |
+          git add MLB_Matchup/images/
+          git add MLB_Matchup/data/
+
+      - name: Commit and push if changes exist
+        run: |
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-update images and data folders"
+            git push
+          fi
+
+permissions:
+  contents: write
+

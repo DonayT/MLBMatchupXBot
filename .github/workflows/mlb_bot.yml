@@ -32,3 +32,6 @@ jobs:
 
       - name: Run bot script
         run: python bot.py
+
+      - name: Run Practice Lineup
+        run: python MLBMatchup.py

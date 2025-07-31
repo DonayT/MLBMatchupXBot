@@ -1,6 +1,7 @@
 from requests_oauthlib import OAuth1Session
 import os
 import json
+import argparse
 
 consumer_key = os.environ.get("CONSUMER_KEY")
 consumer_secret = os.environ.get("CONSUMER_SECRET")
@@ -26,38 +27,52 @@ oauth = OAuth1Session(
     resource_owner_secret=access_token_secret,
 )
 
-# Opens Image and assigns it to media id
-with open("PracticeLineups/ExampleLineup4.png", "rb") as image_file:
-    files = {"media": image_file}
-    upload_url = "https://upload.twitter.com/1.1/media/upload.json"
-    response = oauth.post(upload_url, files=files)
+def main():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Upload image to Twitter')
+    parser.add_argument('--image', help='Path to the image file to upload')
+    parser.add_argument('--text', help='Tweet text')
+    args = parser.parse_args()
+    
+    # Use provided image path or default
+    image_path = args.image if args.image else "PracticeLineups/ExampleLineup4.png"
+    tweet_text = args.text if args.text else "Practice LineUp 07/10/25\n#BuiltForThis vs #GuardsBall"
+    
+    # Opens Image and assigns it to media id
+    with open(image_path, "rb") as image_file:
+        files = {"media": image_file}
+        upload_url = "https://upload.twitter.com/1.1/media/upload.json"
+        response = oauth.post(upload_url, files=files)
 
-    if response.status_code != 200:
-        raise Exception(f"Image upload failed: {response.status_code} {response.text}")
+        if response.status_code != 200:
+            raise Exception(f"Image upload failed: {response.status_code} {response.text}")
 
-    media_id = response.json()["media_id_string"]
+        media_id = response.json()["media_id_string"]
 
-# Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote Tweets, Tweet with reply settings, and Tweet to Super Followers in addition to other features.
-payload = {
-    "text": "Practice LineUp 07/10/25\n#BuiltForThis vs #GuardsBall",
-    "media": {
-            "media_ids": [media_id]
+    # Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote T
+    payload = {
+        "text": tweet_text,
+        "media": {
+                "media_ids": [media_id]
+            }
         }
-    }
 
-# Making the request
-response = oauth.post(
-    "https://api.twitter.com/2/tweets",
-    json=payload,
-)
-
-if response.status_code != 201:
-    raise Exception(
-        "Request returned an error: {} {}".format(response.status_code, response.text)
+    # Making the request
+    response = oauth.post(
+        "https://api.twitter.com/2/tweets",
+        json=payload,
     )
 
-print("Response code: {}".format(response.status_code))
+    if response.status_code != 201:
+        raise Exception(
+            "Request returned an error: {} {}".format(response.status_code, response.text)
+        )
 
-# Saving the response as JSON
-json_response = response.json()
-print(json.dumps(json_response, indent=4, sort_keys=True))
+    print("Response code: {}".format(response.status_code))
+
+    # Saving the response as JSON
+    json_response = response.json()
+    print(json.dumps(json_response, indent=4, sort_keys=True))
+
+if __name__ == "__main__":
+    main()

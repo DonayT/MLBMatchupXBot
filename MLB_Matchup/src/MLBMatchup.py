@@ -5,6 +5,7 @@ from twitter_image_generator import create_twitter_image
 import json
 import os
 import sys
+import subprocess
 
 # Add src directory to path so we can import modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -109,6 +110,34 @@ def get_game_data(game):
     
     return game_data
 
+def upload_image_to_twitter(image_path, game_data):
+    """Upload the generated image to Twitter using bot.py"""
+    try:
+        # Create tweet text with game information
+        tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
+        tweet_text += f"Home SP: {game_data['home_pitcher']}\n"
+        tweet_text += f"Away SP: {game_data['away_pitcher']}\n"
+        tweet_text += "#MLB #Baseball"
+        
+        # Call bot.py with the image path and tweet text
+        # We'll need to modify bot.py to accept command line arguments
+        cmd = [
+            "python", 
+            "../../Xbot/bot.py",
+            "--image", image_path,
+            "--text", tweet_text
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print(f"   Successfully uploaded image to Twitter")
+        else:
+            print(f"   Error uploading to Twitter: {result.stderr}")
+            
+    except Exception as e:
+        print(f"   Error calling bot.py: {e}")
+
 def process_games():
     """Main function to process games with queue system"""
     today = datetime.now().strftime('%Y-%m-%d')
@@ -158,6 +187,9 @@ def process_games():
                 # Mark as processed
                 game_queue.mark_processed(game_data['game_id'])
                 print(f"   Game {game_data['game_id']} marked as processed")
+
+                # Upload image to Twitter
+                upload_image_to_twitter(image_path, game_data)
                 
             except Exception as e:
                 print(f"   Error creating image: {e}")

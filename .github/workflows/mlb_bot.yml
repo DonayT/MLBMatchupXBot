@@ -28,7 +28,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Practice File
-        run: python practice.py
+        run: python connectionCheck.py
 
       - name: Run bot script
         run: python bot.py

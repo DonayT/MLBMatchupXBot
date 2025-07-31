@@ -123,7 +123,7 @@ def upload_image_to_twitter(image_path, game_data):
         # We'll need to modify bot.py to accept command line arguments
         cmd = [
             "python", 
-            "../../Xbot/bot.py",
+            "Xbot/bot.py",
             "--image", image_path,
             "--text", tweet_text
         ]

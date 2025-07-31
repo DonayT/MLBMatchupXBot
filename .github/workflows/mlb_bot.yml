@@ -43,8 +43,8 @@ jobs:
 
       - name: Stage only specific folders
         run: |
-          git add mlbmatchup/images/
-          git add mlbmatchup/data/
+          git add MLB_Matchup/images/
+          git add MLB_Matchup/data/
 
       - name: Commit and push if changes exist
         run: |
@@ -54,7 +54,7 @@ jobs:
             git commit -m "Auto-update images and data folders"
             git push
           fi
-          
-  env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write
 

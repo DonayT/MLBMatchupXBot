@@ -18,9 +18,6 @@ for name, value in required_vars.items():
     if not value:
         raise EnvironmentError(f"Missing environment variable: {name}")
 
-# Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote Tweets, Tweet with reply settings, and Tweet to Super Followers in addition to other features.
-payload = {"text": "Hello world!"}
-
 # Make the request
 oauth = OAuth1Session(
     consumer_key,
@@ -28,6 +25,25 @@ oauth = OAuth1Session(
     resource_owner_key=access_token,
     resource_owner_secret=access_token_secret,
 )
+
+# Opens Image and assigns it to media id
+with open("ExampleLineup4.png", "rb") as image_file:
+    files = {"media": image_file}
+    upload_url = "https://upload.twitter.com/1.1/media/upload.json"
+    response = oauth.post(upload_url, files=files)
+
+    if response.status_code != 200:
+        raise Exception(f"Image upload failed: {response.status_code} {response.text}")
+
+    media_id = response.json()["media_id_string"]
+
+# Be sure to add replace the text of the with the text you wish to Tweet. You can also add parameters to post polls, quote Tweets, Tweet with reply settings, and Tweet to Super Followers in addition to other features.
+payload = {
+    "text": "Practice LineUp 07/10/25\n#BuiltForThis vs #GuardsBall",
+    "media": {
+            "media_ids": [media_id]
+        }
+    }
 
 # Making the request
 response = oauth.post(

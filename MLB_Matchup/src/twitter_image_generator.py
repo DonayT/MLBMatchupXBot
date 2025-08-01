@@ -1,3 +1,4 @@
+from tkinter import X
 from turtle import home
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -86,7 +87,7 @@ class TwitterImageGenerator:
         except:
             return {}
 
-    def get_centered_text_xy(draw, text, font, center):
+    def get_centered_text_xy(self, draw, text, font, center):
         
         cx, cy = center
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -124,16 +125,17 @@ class TwitterImageGenerator:
         # Away team abbreviation with outline
         outline_width = 5
         # Draw outline by drawing text multiple times with offsets
+        x, y = self.get_centered_text_xy(draw, away_abr, self.font_big, (160, 40))
         away_secondary_color = self.team_secondary_colors.get(game_data['away_team'], "black")
         for dx in range(-outline_width, outline_width + 1):
             for dy in range(-outline_width, outline_width + 1):
                 if dx != 0 or dy != 0:  # Skip the center position
-                    draw.text((50 + dx, -30 + dy), away_abr, font=self.font_big, fill=away_secondary_color)
+                    draw.text((x + dx, y + dy), away_abr, font=self.font_big, fill=away_secondary_color)
         # Draw the main text
-        draw.text((50,-30), away_abr, font=self.font_big, fill=away_color)
+        draw.text((x,y), away_abr, font=self.font_big, fill=away_color)
         
         # Home team abbreviation with outline
-        x, y = get_centered_text_xy(draw, home_abr, self.font_big, (500, -30))
+        x, y = self.get_centered_text_xy(draw, home_abr, self.font_big, (640, 40))
         home_secondary_color = self.team_secondary_colors.get(game_data['home_team'], "black")
         for dx in range(-outline_width, outline_width + 1):
             for dy in range(-outline_width, outline_width + 1):
@@ -155,46 +157,60 @@ class TwitterImageGenerator:
         venue = game_data.get('venue', 'TBD')
         location = game_data.get('location', 'TBD')
         
-        draw.text((self.width//2-20, 100), game_date, font=self.font_mid, fill=self.text_color)
-        draw.text((self.width//2-20, 130), venue, font=self.font_mid, fill=self.text_color)
-        draw.text((self.width//2-20, 160), location, font=self.font_mid, fill=self.text_color)
+        x, y = self.get_centered_text_xy(draw, game_date, self.font_mid, (400, 40))
+        draw.text((x, 100), game_date, font=self.font_mid, fill=self.text_color)
+        x, y = self.get_centered_text_xy(draw, venue, self.font_mid, (400, 40))
+        draw.text((x, 130), venue, font=self.font_mid, fill=self.text_color)
+        x, y = self.get_centered_text_xy(draw, location, self.font_mid, (400, 40))
+        draw.text((x, 160), location, font=self.font_mid, fill=self.text_color)
         
         # Draw lineups - just the text, no table drawing
         away_lineup = game_data.get('away_lineup', [])
         home_lineup = game_data.get('home_lineup', [])
         
         # Define positions for text (you'll need to adjust these to match your template)
-        table_top = 145
-        row_h = 75
-        col_w = self.width//3
+        YvalTopCell = 250
+        row_h = 78
         
         # Pitcher names with separate SP label and name fields
         away_sp = game_data.get('away_pitcher', 'TBD')
         home_sp = game_data.get('home_pitcher', 'TBD')
-        draw.text((35, table_top+row_h+15), "SP", font=self.font_reg, fill="black")
-        draw.text((115, table_top+row_h+15), away_sp, font=self.font_bold, fill="black")
-        draw.text((col_w*2, table_top+row_h+15), "SP", font=self.font_reg, fill="black")
-        draw.text((col_w*2+80, table_top+row_h+15), home_sp, font=self.font_bold, fill="black")
+
+        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (55, YvalTopCell))
+        draw.text((x, y), "SP", font=self.font_reg, fill="black")
+
+        x, y = self.get_centered_text_xy(draw, away_sp, self.font_bold, (260, YvalTopCell))
+        draw.text((x, y), away_sp, font=self.font_bold, fill="black")
+
+        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (455, YvalTopCell))
+        draw.text((x, y), "SP", font=self.font_reg, fill="black")
+
+        x, y = self.get_centered_text_xy(draw, home_sp, self.font_bold, (660, YvalTopCell))
+        draw.text((x, y), home_sp, font=self.font_bold, fill="black")
         
         # Draw lineup text only
         for i in range(9):
-            y = table_top + row_h*(i+2)
+            y = (YvalTopCell+45) + row_h*(i)
             
             # Away team lineup (left column)
             if i < len(away_lineup):
                 player = away_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
-                draw.text((35, y+50), pos, font=self.font_reg, fill="black")
-                draw.text((100, y+22), name, font=self.font_bold, fill="black")
+                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (55, 40))
+                draw.text((x, y+22), pos, font=self.font_reg, fill="black")
+                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (260, 40))
+                draw.text((x, y+22), name, font=self.font_bold, fill="black")
             
             # Home team lineup (right column)
             if i < len(home_lineup):
                 player = home_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
-                draw.text((col_w*2+35, y+22), pos, font=self.font_reg, fill="black")
-                draw.text((col_w*2+100, y+22), name, font=self.font_bold, fill="black")
+                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (455, 40))
+                draw.text((x, y+22), pos, font=self.font_reg, fill="black")
+                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (660, 40))
+                draw.text((x, y+22), name, font=self.font_bold, fill="black")
         
         # Save the image
         image.save(output_path)

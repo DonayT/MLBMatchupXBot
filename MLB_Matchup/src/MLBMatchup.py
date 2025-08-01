@@ -79,17 +79,20 @@ def get_game_data(game):
     game_datetime = game.get('game_datetime', '')
     game_date = game.get('game_date', '')
     
-    # Format the date and time
+    # Format the date and time separately
     if game_datetime:
         try:
             # Parse the datetime string and format it
             from datetime import datetime
             dt = datetime.fromisoformat(game_datetime.replace('Z', '+00:00'))
-            formatted_datetime = dt.strftime('%m/%d/%Y %I:%M %p ET')
+            formatted_date = dt.strftime('%m/%d/%Y')
+            formatted_time = dt.strftime('%I:%M %p ET')
         except:
-            formatted_datetime = game_date if game_date else 'TBD'
+            formatted_date = game_date if game_date else 'TBD'
+            formatted_time = 'TBD'
     else:
-        formatted_datetime = game_date if game_date else 'TBD'
+        formatted_date = game_date if game_date else 'TBD'
+        formatted_time = 'TBD'
     
     game_data = {
         'game_id': game_id,
@@ -97,7 +100,8 @@ def get_game_data(game):
         'away_team': away,
         'home_pitcher': home_pitcher,
         'away_pitcher': away_pitcher,
-        'game_datetime': formatted_datetime,
+        'game_date': formatted_date,
+        'game_time': formatted_time,
         'home_lineup': [],
         'away_lineup': [],
         'lineups_official': are_lineups_official(boxscore)
@@ -142,7 +146,7 @@ def upload_image_to_twitter(image_path, game_data):
         home_abr = teamAbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())
         
         tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
-        tweet_text += f"{game_data['game_datetime']}\n"
+        tweet_text += f"🕐 {game_data['game_time']} 📅 {game_data['game_date']}\n"
         tweet_text += f"{away_hashtag} {home_hashtag}\n"
         tweet_text += f"#{away_abr}vs{home_abr} // #{home_abr}vs{away_abr}"
         

@@ -146,7 +146,7 @@ def upload_image_to_twitter(image_path, game_data):
         away_hashtag = teamHashtags.get(game_data['away_team'], f"#{game_data['away_team'].replace(' ', '')}")
         home_hashtag = teamHashtags.get(game_data['home_team'], f"#{game_data['home_team'].replace(' ', '')}")
 
-        with open("MLB_Matchup/data/teamAbreviations.json", "r") as f:
+        with open("MLB_Matchup/config/teamAbreviations.json", "r") as f:
             teamAbreviations = json.load(f)
         away_abr = teamAbreviations.get(game_data['away_team'], game_data['away_team'][:3].upper())
         home_abr = teamAbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())

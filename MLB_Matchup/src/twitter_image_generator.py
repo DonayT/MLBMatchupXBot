@@ -1,90 +1,156 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
+import json
 
 class TwitterImageGenerator:
     def __init__(self):
-        # Twitter image dimensions (1200x675 is optimal for Twitter)
-        self.width = 1200
-        self.height = 675
+        # Image dimensions for the new layout
+        self.width = 800
+        self.height = 1000
         
-        # Colors - Clean and simple
+        # Colors
         self.background_color = (255, 255, 255)  # White
         self.text_color = (0, 0, 0)  # Black
-        self.title_color = (0, 0, 0)  # Black for title
-        self.divider_color = (200, 200, 200)  # Light gray for dividers
+        self.divider_color = (200, 200, 200)  # Light gray
         
-        # Fonts - Clean and readable
+        # Load team colors
+        self.team_colors = self.load_team_colors()
+        self.team_secondary_colors = self.load_team_secondary_colors()
+        
+        # Fonts
         try:
-            self.title_font = ImageFont.truetype("arial.ttf", 32)
-            self.header_font = ImageFont.truetype("arial.ttf", 20)
-            self.body_font = ImageFont.truetype("arial.ttf", 16)
-            self.pitcher_font = ImageFont.truetype("arial.ttf", 18)
+            self.font_big = ImageFont.truetype("arialbd.ttf", 140)
+            self.font_vs = ImageFont.truetype("arialbd.ttf", 60)
+            self.font_mid = ImageFont.truetype("arialbd.ttf", 32)
+            self.font_bold = ImageFont.truetype("arialbd.ttf", 36)
+            self.font_reg = ImageFont.truetype("arial.ttf", 32)
         except:
             # Fallback to default font
-            self.title_font = ImageFont.load_default()
-            self.header_font = ImageFont.load_default()
-            self.body_font = ImageFont.load_default()
-            self.pitcher_font = ImageFont.load_default()
+            self.font_big = ImageFont.load_default()
+            self.font_vs = ImageFont.load_default()
+            self.font_mid = ImageFont.load_default()
+            self.font_bold = ImageFont.load_default()
+            self.font_reg = ImageFont.load_default()
+    
+    def load_team_colors(self):
+        """Load team colors from JSON file"""
+        try:
+            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamPrimaryColors.json')
+            with open(config_path, "r") as f:
+                return json.load(f)
+        except:
+            return {}
+    
+    def load_team_secondary_colors(self):
+        """Load team secondary colors from JSON file"""
+        try:
+            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamSecondaryColors.json')
+            with open(config_path, "r") as f:
+                return json.load(f)
+        except:
+            return {}
+    
+    def load_team_abbreviations(self):
+        """Load team abbreviations from JSON file"""
+        try:
+            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamAbreviations.json')
+            with open(config_path, "r") as f:
+                return json.load(f)
+        except:
+            return {}
     
     def create_lineup_image(self, game_data, output_path):
-        """Create a clean lineup image with side-by-side layout"""
+        """Create a lineup image similar to the reference design"""
         
         # Create the base image
         image = Image.new('RGB', (self.width, self.height), self.background_color)
         draw = ImageDraw.Draw(image)
         
-        # Draw title at the top
-        title = f"{game_data['away_team']} @ {game_data['home_team']}"
-        title_bbox = draw.textbbox((0, 0), title, font=self.title_font)
-        title_width = title_bbox[2] - title_bbox[0]
-        title_x = (self.width - title_width) // 2
-        draw.text((title_x, 30), title, font=self.title_font, fill=self.title_color)
+        # Get team abbreviations and colors
+        team_abbreviations = self.load_team_abbreviations()
+        away_abr = team_abbreviations.get(game_data['away_team'], game_data['away_team'][:3].upper())
+        home_abr = team_abbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())
+        away_color = self.team_colors.get(game_data['away_team'])
+        home_color = self.team_colors.get(game_data['home_team'])
         
-        # Draw pitchers section at the top
-        pitcher_y = 90
-        draw.text((50, pitcher_y), "Starting Pitchers", font=self.header_font, fill=self.text_color)
+        # Draw team abbreviations at top with outlines - positioned like reference image
+        # Away team abbreviation with outline
+        outline_width = 5
+        # Draw outline by drawing text multiple times with offsets
+        away_secondary_color = self.team_secondary_colors.get(game_data['away_team'], "black")
+        for dx in range(-outline_width, outline_width + 1):
+            for dy in range(-outline_width, outline_width + 1):
+                if dx != 0 or dy != 0:  # Skip the center position
+                    draw.text((80 + dx, 50 + dy), away_abr, font=self.font_big, fill=away_secondary_color)
+        # Draw the main text
+        draw.text((80, 50), away_abr, font=self.font_big, fill=away_color)
         
-        # Away pitcher (left side)
-        away_pitcher_text = f"{game_data['away_team']}: {game_data['away_pitcher']}"
-        draw.text((50, pitcher_y + 30), away_pitcher_text, font=self.pitcher_font, fill=self.text_color)
+        # Home team abbreviation with outline
+        home_secondary_color = self.team_secondary_colors.get(game_data['home_team'], "black")
+        for dx in range(-outline_width, outline_width + 1):
+            for dy in range(-outline_width, outline_width + 1):
+                if dx != 0 or dy != 0:  # Skip the center position
+                    draw.text((self.width-280 + dx, 50 + dy), home_abr, font=self.font_big, fill=home_secondary_color)
+        # Draw the main text
+        draw.text((self.width-280, 50), home_abr, font=self.font_big, fill=home_color)
         
-        # Home pitcher (right side)
-        home_pitcher_text = f"{game_data['home_team']}: {game_data['home_pitcher']}"
-        home_pitcher_bbox = draw.textbbox((0, 0), home_pitcher_text, font=self.pitcher_font)
-        home_pitcher_width = home_pitcher_bbox[2] - home_pitcher_bbox[0]
-        home_pitcher_x = self.width - 50 - home_pitcher_width
-        draw.text((home_pitcher_x, pitcher_y + 30), home_pitcher_text, font=self.pitcher_font, fill=self.text_color)
+        # Draw VS centered between team abbreviations
+        draw.text((self.width//2-40, 120), "VS", font=self.font_vs, fill=self.text_color)
         
-        # Draw divider line
-        draw.line([(50, pitcher_y + 70), (self.width - 50, pitcher_y + 70)], 
-                  fill=self.divider_color, width=1)
+        # Game date and venue info - centered below VS
+        game_date = game_data.get('game_date', 'TBD')
+        venue = game_data.get('venue', 'TBD')
+        location = game_data.get('location', 'TBD')
         
-        # Draw lineups side by side
-        lineup_y = pitcher_y + 100
+        draw.text((self.width//2-80, 200), game_date, font=self.font_mid, fill=self.text_color)
+        draw.text((self.width//2-80, 240), venue, font=self.font_mid, fill=self.text_color)
+        draw.text((self.width//2-80, 280), location, font=self.font_mid, fill=self.text_color)
         
-        # Away team lineup (left side)
-        draw.text((50, lineup_y), f"{game_data['away_team']} Lineup", font=self.header_font, fill=self.text_color)
+        # Draw table headers - positioned like reference image
+        table_top = 340
+        row_h = 60
+        col_w = self.width//3
         
-        for i, player in enumerate(game_data['away_lineup']):
-            player_text = f"{player['order']}. {player['name']} ({player['position']})"
-            draw.text((50, lineup_y + 35 + (i * 25)), player_text, font=self.body_font, fill=self.text_color)
+        # Header row
+        draw.rectangle([0, table_top, self.width, table_top+row_h], fill="#e0e0e0")
+        draw.line([(col_w, table_top), (col_w, self.height)], fill="black", width=2)
+        draw.line([(2*col_w, table_top), (2*col_w, self.height)], fill="black", width=2)
         
-        # Home team lineup (right side)
-        home_x = self.width // 2 + 50
-        draw.text((home_x, lineup_y), f"{game_data['home_team']} Lineup", font=self.header_font, fill=self.text_color)
+        # Starting pitchers row
+        draw.text((col_w//2-30, table_top+10), "SP", font=self.font_bold, fill="black")
+        draw.text((col_w+col_w//2-30, table_top+10), "SP", font=self.font_bold, fill="black")
+        draw.text((col_w//2+col_w, table_top+10), "SP", font=self.font_bold, fill="black")
         
-        for i, player in enumerate(game_data['home_lineup']):
-            player_text = f"{player['order']}. {player['name']} ({player['position']})"
-            draw.text((home_x, lineup_y + 35 + (i * 25)), player_text, font=self.body_font, fill=self.text_color)
+        # Pitcher names
+        away_sp = game_data.get('away_pitcher', 'TBD')
+        home_sp = game_data.get('home_pitcher', 'TBD')
+        draw.text((col_w//2-30, table_top+row_h+10), away_sp, font=self.font_bold, fill="black")
+        draw.text((col_w+col_w//2-30, table_top+row_h+10), home_sp, font=self.font_bold, fill="black")
         
-        # Add timestamp at bottom
-        from datetime import datetime
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-        timestamp_text = f"Generated: {timestamp}"
-        timestamp_bbox = draw.textbbox((0, 0), timestamp_text, font=self.body_font)
-        timestamp_width = timestamp_bbox[2] - timestamp_bbox[0]
-        timestamp_x = (self.width - timestamp_width) // 2
-        draw.text((timestamp_x, self.height - 40), timestamp_text, font=self.body_font, fill=self.divider_color)
+        # Draw lineups
+        away_lineup = game_data.get('away_lineup', [])
+        home_lineup = game_data.get('home_lineup', [])
+        
+        for i in range(9):
+            y = table_top + row_h*(i+2)
+            
+            # Away team lineup (left column)
+            draw.rectangle([0, y, col_w, y+row_h], fill="#f5f5f5" if i%2==0 else "white")
+            if i < len(away_lineup):
+                player = away_lineup[i]
+                pos = player.get('position', '')
+                name = player.get('name', '')
+                draw.text((20, y+15), pos, font=self.font_reg, fill="black")
+                draw.text((80, y+15), name, font=self.font_bold, fill="black")
+            
+            # Home team lineup (right column)
+            draw.rectangle([col_w*2, y, self.width, y+row_h], fill="#f5f5f5" if i%2==0 else "white")
+            if i < len(home_lineup):
+                player = home_lineup[i]
+                pos = player.get('position', '')
+                name = player.get('name', '')
+                draw.text((col_w*2+20, y+15), pos, font=self.font_reg, fill="black")
+                draw.text((col_w*2+80, y+15), name, font=self.font_bold, fill="black")
         
         # Save the image
         image.save(output_path)

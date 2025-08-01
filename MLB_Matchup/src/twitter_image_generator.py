@@ -25,7 +25,7 @@ class TwitterImageGenerator:
         
         try:
             # Load fonts from config folder
-            anton_path = os.path.join(config_path, "Anton.ttf")
+            anton_path = os.path.join(config_path, "anton.ttf")
             worksans_regular_path = os.path.join(config_path, "WorkSans-Regular.ttf")
             worksans_bold_path = os.path.join(config_path, "WorkSans-Bold.ttf")
             

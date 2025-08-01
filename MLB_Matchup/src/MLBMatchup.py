@@ -140,7 +140,7 @@ def get_game_data(game):
 def upload_image_to_twitter(image_path, game_data):
     """Upload the generated image to Twitter using bot.py"""
     try:
-        with open("MLB_Matchup/data/teamHashtags.json", "r") as f:
+        with open("MLB_Matchup/config/teamHashtags.json", "r") as f:
             teamHashtags = json.load(f)
         # Create tweet text with game information in the desired format
         away_hashtag = teamHashtags.get(game_data['away_team'], f"#{game_data['away_team'].replace(' ', '')}")

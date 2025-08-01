@@ -75,12 +75,39 @@ def get_game_data(game):
     home_pitcher = game.get('home_probable_pitcher') or 'TBD'
     away_pitcher = game.get('away_probable_pitcher') or 'TBD'
     
+    # Get game date and time
+    game_datetime = game.get('game_datetime', '')
+    game_date = game.get('game_date', '')
+    
+    # Format the date and time separately
+    if game_datetime:
+        try:
+            # Parse the datetime string and format it
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+
+            #Switch to Eastern Time
+            dt = datetime.fromisoformat(game_datetime.replace('Z', '+00:00'))
+            dt_et = dt.astimezone(ZoneInfo("America/New_York"))
+
+            #Format date/time
+            formatted_date = dt_et.strftime('%m/%d/%Y')
+            formatted_time = dt_et.strftime('%I:%M %p ET')
+        except:
+            formatted_date = game_date if game_date else 'TBD'
+            formatted_time = 'TBD'
+    else:
+        formatted_date = game_date if game_date else 'TBD'
+        formatted_time = 'TBD'
+    
     game_data = {
         'game_id': game_id,
         'home_team': home,
         'away_team': away,
         'home_pitcher': home_pitcher,
         'away_pitcher': away_pitcher,
+        'game_date': formatted_date,
+        'game_time': formatted_time,
         'home_lineup': [],
         'away_lineup': [],
         'lineups_official': are_lineups_official(boxscore)
@@ -115,13 +142,19 @@ def upload_image_to_twitter(image_path, game_data):
     try:
         with open("MLB_Matchup/data/teamHashtags.json", "r") as f:
             teamHashtags = json.load(f)
-        # Create tweet text with game information
+        # Create tweet text with game information in the desired format
         away_hashtag = teamHashtags.get(game_data['away_team'], f"#{game_data['away_team'].replace(' ', '')}")
         home_hashtag = teamHashtags.get(game_data['home_team'], f"#{game_data['home_team'].replace(' ', '')}")
-        tweet_text = f"{away_hashtag} @ {home_hashtag}\n"
-        tweet_text += f"Home SP: {game_data['home_pitcher']}\n"
-        tweet_text += f"Away SP: {game_data['away_pitcher']}\n"
-        tweet_text += "#MLB #Baseball"
+
+        with open("MLB_Matchup/data/teamAbreviations.json", "r") as f:
+            teamAbreviations = json.load(f)
+        away_abr = teamAbreviations.get(game_data['away_team'], game_data['away_team'][:3].upper())
+        home_abr = teamAbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())
+        
+        tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
+        tweet_text += f"🕐 {game_data['game_time']} 📅 {game_data['game_date']}\n"
+        tweet_text += f"{away_hashtag} {home_hashtag}\n"
+        tweet_text += f"#{away_abr}vs{home_abr} // #{home_abr}vs{away_abr}"
         
         # Call bot.py with the image path and tweet text
         # We'll need to modify bot.py to accept command line arguments

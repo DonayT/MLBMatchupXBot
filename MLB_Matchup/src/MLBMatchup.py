@@ -84,9 +84,15 @@ def get_game_data(game):
         try:
             # Parse the datetime string and format it
             from datetime import datetime
+            from zoneinfo import ZoneInfo
+
+            #Switch to Eastern Time
             dt = datetime.fromisoformat(game_datetime.replace('Z', '+00:00'))
-            formatted_date = dt.strftime('%m/%d/%Y')
-            formatted_time = dt.strftime('%I:%M %p ET')
+            dt_et = dt.astimezone(ZoneInfo("America/New_York"))
+
+            #Format date/time
+            formatted_date = dt_et.strftime('%m/%d/%Y')
+            formatted_time = dt_et.strftime('%I:%M %p ET')
         except:
             formatted_date = game_date if game_date else 'TBD'
             formatted_time = 'TBD'

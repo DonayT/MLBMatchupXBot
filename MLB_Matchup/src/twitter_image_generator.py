@@ -37,8 +37,8 @@ class TwitterImageGenerator:
             self.font_big = ImageFont.truetype(anton_path, 182)  # Team abbreviations
             self.font_vs = ImageFont.truetype(anton_path, 60)    # VS text
             self.font_mid = ImageFont.truetype(worksans_regular_path, 22)  # Time, stadium, location
-            self.font_bold = ImageFont.truetype(worksans_bold_path, 33)  # Player names
-            self.font_reg = ImageFont.truetype(worksans_regular_path, 33)  # Positions
+            self.font_bold = ImageFont.truetype(worksans_bold_path, 30)  # Player names
+            self.font_reg = ImageFont.truetype(worksans_regular_path, 30)  # Positions
             print("Successfully loaded custom fonts!")
         except Exception as e:
             print(f"Failed to load custom fonts: {e}")

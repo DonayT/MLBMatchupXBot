@@ -155,7 +155,9 @@ class TwitterImageGenerator:
         # Game date and venue info - centered below VS
         game_date = game_data.get('game_date', 'TBD')
         venue = game_data.get('venue', 'TBD')
-        location = game_data.get('location', 'TBD')
+        city = game_data.get('city', 'TBD')
+        state = game_data.get('state', 'TBD')
+        location = f"{city}, {state}"
         
         x, y = self.get_centered_text_xy(draw, game_date, self.font_mid, (400, 40))
         draw.text((x, 100), game_date, font=self.font_mid, fill=self.text_color)
@@ -170,36 +172,45 @@ class TwitterImageGenerator:
         
         # Define positions for text (you'll need to adjust these to match your template)
         YvalTopCell = 250
-        row_h = 78
+        rowHeight = 78
+        maximumNameWidth = 300
         
         # Pitcher names with separate SP label and name fields
         away_sp = game_data.get('away_pitcher', 'TBD')
         home_sp = game_data.get('home_pitcher', 'TBD')
 
-        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (55, YvalTopCell))
+        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (40, YvalTopCell))
         draw.text((x, y), "SP", font=self.font_reg, fill="black")
 
-        x, y = self.get_centered_text_xy(draw, away_sp, self.font_bold, (260, YvalTopCell))
+        x, y = self.get_centered_text_xy(draw, away_sp, self.font_bold, (240, YvalTopCell))
         draw.text((x, y), away_sp, font=self.font_bold, fill="black")
 
-        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (455, YvalTopCell))
+        x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (440, YvalTopCell))
         draw.text((x, y), "SP", font=self.font_reg, fill="black")
 
-        x, y = self.get_centered_text_xy(draw, home_sp, self.font_bold, (660, YvalTopCell))
+        x, y = self.get_centered_text_xy(draw, home_sp, self.font_bold, (640, YvalTopCell))
         draw.text((x, y), home_sp, font=self.font_bold, fill="black")
         
         # Draw lineup text only
         for i in range(9):
-            y = (YvalTopCell+45) + row_h*(i)
+            y = (YvalTopCell+45) + rowHeight*(i)
             
             # Away team lineup (left column)
             if i < len(away_lineup):
                 player = away_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
-                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (55, 40))
+
+                # Shorten name if too wide
+                name_bbox = draw.textbbox((0, 0), name, font=self.font_bold)
+                if (name_bbox[2] - name_bbox[0]) > maximumNameWidth:
+                    parts = name.split()
+                    if len(parts) > 1:
+                        name = f"{parts[0][0]}. {' '.join(parts[1:])}"
+
+                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (40, 40))
                 draw.text((x, y+22), pos, font=self.font_reg, fill="black")
-                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (260, 40))
+                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (240, 40))
                 draw.text((x, y+22), name, font=self.font_bold, fill="black")
             
             # Home team lineup (right column)
@@ -207,9 +218,17 @@ class TwitterImageGenerator:
                 player = home_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
-                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (455, 40))
+
+                # Shorten name if too wide
+                name_bbox = draw.textbbox((0, 0), name, font=self.font_bold)
+                if (name_bbox[2] - name_bbox[0]) > maximumNameWidth:
+                    parts = name.split()
+                    if len(parts) > 1:
+                        name = f"{parts[0][0]}. {' '.join(parts[1:])}"
+
+                x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (440, 40))
                 draw.text((x, y+22), pos, font=self.font_reg, fill="black")
-                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (660, 40))
+                x, n = self.get_centered_text_xy(draw, name, self.font_bold, (640, 40))
                 draw.text((x, y+22), name, font=self.font_bold, fill="black")
         
         # Save the image

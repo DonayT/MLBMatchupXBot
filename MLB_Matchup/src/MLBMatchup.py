@@ -78,6 +78,22 @@ def get_game_data(game):
     # Get game date and time
     game_datetime = game.get('game_datetime', '')
     game_date = game.get('game_date', '')
+
+    venue_id = game.get('venue_id')
+    venue_name = 'Unknown Venue'
+    city = 'Unknown City'
+    state = 'Unknown State'
+
+    if venue_id:
+        venue_data = statsapi.get('venue', {'venueIds': venue_id})
+        venue = venue_data['venues'][0]
+        pprint.pprint(venue)
+        venue_name = venue.get('name', 'Unknown Venue')
+        city = venue.get('city', 'Unknown')
+        state = venue.get('state', 'Unknown')
+        print(city, state)
+
+    print(game.keys())
     
     # Format the date and time separately
     if game_datetime:
@@ -110,6 +126,9 @@ def get_game_data(game):
         'game_time': formatted_time,
         'home_lineup': [],
         'away_lineup': [],
+        'venue': venue_name,
+        'city': city,
+        'state': state,
         'lineups_official': are_lineups_official(boxscore)
     }
     

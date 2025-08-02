@@ -240,6 +240,7 @@ def process_games():
 if __name__ == "__main__":
     result = process_games()
     if result == "ALL_DONE":
-        exit(42)  # Special exit code for "all done"
+        print("✅ All games processed successfully - exiting cleanly")
+        exit(0)  # Success exit code for "all done"
     else:
         exit(0)   # Normal exit

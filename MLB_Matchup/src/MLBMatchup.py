@@ -89,8 +89,8 @@ def get_game_data(game):
         venue = venue_data['venues'][0]
         pprint.pprint(venue)
         venue_name = venue.get('name', 'Unknown Venue')
-        city = venue.get('city', 'Unknown City')
-        state = venue.get('state', 'Unknown State')
+        city = venue.get('city', 'Unknown')
+        state = venue.get('state', 'Unknown')
         print(city, state)
 
     print(game.keys())

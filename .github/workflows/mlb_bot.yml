@@ -2,8 +2,8 @@ name: Run MLB Matchup Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 15 minutes
-  workflow_dispatch:      # Optional: lets you manually trigger from GitHub
+    - cron: "*/1 * * * *" # Every 15 minutes
+  workflow_dispatch: # Optional: lets you manually trigger from GitHub
 
 jobs:
   run-bot:
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -51,4 +51,3 @@ jobs:
 
 permissions:
   contents: write
-

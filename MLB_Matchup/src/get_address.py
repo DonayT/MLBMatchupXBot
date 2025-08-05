@@ -29,8 +29,12 @@ def convert_state_to_abbreviation(state_name):
     return state_name
 
 def get_city_state(place_name):
-    geolocator = Nominatim(user_agent="place_locator")
-    location = geolocator.geocode(place_name)
+    geolocator = Nominatim(user_agent="place_locator", timeout=10)  # Increased timeout to 10 seconds
+    try:
+        location = geolocator.geocode(place_name)
+    except Exception as e:
+        print(f"Geocoding error for {place_name}: {e}")
+        return None
 
     if location:
         address = location.raw.get('display_name', '')

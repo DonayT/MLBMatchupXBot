@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import subprocess
+import get_address
 
 # Add src directory to path so we can import modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -81,16 +82,35 @@ def get_game_data(game):
 
     venue_id = game.get('venue_id')
     venue_name = 'Unknown Venue'
+    city = 'Unknown City'
+    state = 'Unknown State'
     
 
     if venue_id:
         venue_data = statsapi.get('venue', {'venueIds': venue_id})
         venue = venue_data['venues'][0]
-        pprint.pprint(venue)
+        # pprint.pprint(venue)  # Commented out for performance
         venue_name = venue.get('name', 'Unknown Venue')
-        print(venue_name)
+        # print(venue_name)  # Commented out for performance
+        
+        # Get city and state from venue name
+        if venue_name != 'Unknown Venue':
+            try:
+                city_state = get_address.get_city_state(venue_name)
+                if city_state:
+                    city, state = city_state.split(', ')
+                else:
+                    city = 'Unknown City'
+                    state = 'Unknown State'
+            except Exception as e:
+                print(f"   Error getting city/state for {venue_name}: {e}")
+                city = 'Unknown City'
+                state = 'Unknown State'
+        else:
+            city = 'Unknown City'
+            state = 'Unknown State'
 
-    print(game.keys())
+    # print(game.keys())  # Commented out for performance
     
     # Format the date and time separately
     if game_datetime:

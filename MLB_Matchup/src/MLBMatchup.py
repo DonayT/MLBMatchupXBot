@@ -11,8 +11,14 @@ import get_address
 # Add src directory to path so we can import modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Add Xbot directory to path for importing the uploader
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Xbot'))
+
 # Import date organizer
 from date_organizer import check_date_transition, organize_existing_images
+
+# Import the upload function
+from x_uploader import upload_image_to_twitter
 
 class GameQueue:
     def __init__(self, queue_file=None):
@@ -172,44 +178,6 @@ def get_game_data(game):
             game_data['away_lineup'] = lineup
     
     return game_data
-
-def upload_image_to_twitter(image_path, game_data):
-    """Upload the generated image to Twitter using bot.py"""
-    try:
-        with open("MLB_Matchup/config/teamHashtags.json", "r") as f:
-            teamHashtags = json.load(f)
-        # Create tweet text with game information in the desired format
-        away_hashtag = teamHashtags.get(game_data['away_team'], f"#{game_data['away_team'].replace(' ', '')}")
-        home_hashtag = teamHashtags.get(game_data['home_team'], f"#{game_data['home_team'].replace(' ', '')}")
-
-        with open("MLB_Matchup/config/teamAbreviations.json", "r") as f:
-            teamAbreviations = json.load(f)
-        away_abr = teamAbreviations.get(game_data['away_team'], game_data['away_team'][:3].upper())
-        home_abr = teamAbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())
-        
-        tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
-        tweet_text += f"🕐 {game_data['game_time']} 📅 {game_data['game_date']}\n"
-        tweet_text += f"{away_hashtag} {home_hashtag}\n"
-        tweet_text += f"#{away_abr}vs{home_abr} // #{home_abr}vs{away_abr}"
-        
-        # Call bot.py with the image path and tweet text
-        # We'll need to modify bot.py to accept command line arguments
-        cmd = [
-            "python", 
-            "Xbot/bot.py",
-            "--image", image_path,
-            "--text", tweet_text
-        ]
-        
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print(f"   Successfully uploaded image to Twitter")
-        else:
-            print(f"   Error uploading to Twitter: {result.stderr}")
-            
-    except Exception as e:
-        print(f"   Error calling bot.py: {e}")
 
 def process_games():
     """Main function to process games with queue system"""

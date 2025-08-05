@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run MLB Bot",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/MLB_Matchup/src/MLBMatchup.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/MLB_Matchup/src:${workspaceFolder}/Xbot"
+            }
+        },
+        {
+            "name": "Run Get Address",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/MLB_Matchup/src/get_address.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+        },
+        {
+            "name": "Run Twitter Bot",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Xbot/bot.py",
+            "args": [
+                "--image",
+                "PracticeLineups/ExampleLineup4.png",
+                "--text",
+                "Test tweet from system Python"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+        },
+        {
+            "name": "Test Image Generator",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/MLB_Matchup/src/test_image_generator.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "python": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+        },
+
+    ]
+} 

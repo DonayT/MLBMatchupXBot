@@ -1,0 +1,62 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run MLB Bot",
+            "type": "shell",
+            "command": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "args": ["MLB_Matchup/src/MLBMatchup.py"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Get Address",
+            "type": "shell",
+            "command": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "args": ["MLB_Matchup/src/get_address.py"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Install Dependencies",
+            "type": "shell",
+            "command": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "args": ["-m", "pip", "install", "-r", "requirements.txt"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Test Image Generator",
+            "type": "shell",
+            "command": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+            "args": ["MLB_Matchup/src/test_image_generator.py"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+
+    ]
+} 

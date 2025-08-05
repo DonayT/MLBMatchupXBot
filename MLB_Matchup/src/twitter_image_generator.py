@@ -3,6 +3,7 @@ from turtle import home
 from PIL import Image, ImageDraw, ImageFont
 import os
 import json
+import get_address
 
 class TwitterImageGenerator:
     def __init__(self):
@@ -64,27 +65,42 @@ class TwitterImageGenerator:
         """Load team colors from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamPrimaryColors.json')
+            print(f"🔍 Loading team colors from: {config_path}")
+            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
-                return json.load(f)
-        except:
+                data = json.load(f)
+                print(f"   Loaded {len(data)} team colors")
+                return data
+        except Exception as e:
+            print(f"❌ Error loading team colors: {e}")
             return {}
     
     def load_team_secondary_colors(self):
         """Load team secondary colors from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamSecondaryColors.json')
+            print(f"🔍 Loading team secondary colors from: {config_path}")
+            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
-                return json.load(f)
-        except:
+                data = json.load(f)
+                print(f"   Loaded {len(data)} team secondary colors")
+                return data
+        except Exception as e:
+            print(f"❌ Error loading team secondary colors: {e}")
             return {}
     
     def load_team_abbreviations(self):
         """Load team abbreviations from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamAbreviations.json')
+            print(f"🔍 Loading team abbreviations from: {config_path}")
+            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
-                return json.load(f)
-        except:
+                data = json.load(f)
+                print(f"   Loaded {len(data)} team abbreviations")
+                return data
+        except Exception as e:
+            print(f"❌ Error loading team abbreviations: {e}")
             return {}
 
     def get_centered_text_xy(self, draw, text, font, center):
@@ -121,6 +137,15 @@ class TwitterImageGenerator:
         away_color = self.team_colors.get(game_data['away_team'])
         home_color = self.team_colors.get(game_data['home_team'])
         
+        # Debug: Print team data
+        print(f"🎨 Team Colors Debug:")
+        print(f"   Away team: '{game_data['away_team']}' -> Color: {away_color}")
+        print(f"   Home team: '{game_data['home_team']}' -> Color: {home_color}")
+        print(f"   Away abbreviation: '{away_abr}'")
+        print(f"   Home abbreviation: '{home_abr}'")
+        print(f"   Available team colors: {list(self.team_colors.keys())[:5]}...")
+        print(f"   Available abbreviations: {list(team_abbreviations.keys())[:5]}...")
+        
         # Draw team abbreviations at top with outlines - positioned like reference image
         # Away team abbreviation with outline
         outline_width = 5
@@ -155,9 +180,7 @@ class TwitterImageGenerator:
         # Game date and venue info - centered below VS
         game_date = game_data.get('game_date', 'TBD')
         venue = game_data.get('venue', 'TBD')
-        city = game_data.get('city', 'TBD')
-        state = game_data.get('state', 'TBD')
-        location = f"{city}, {state}"
+        location = get_address.get_city_state(venue)
         
         x, y = self.get_centered_text_xy(draw, game_date, self.font_mid, (400, 40))
         draw.text((x, 100), game_date, font=self.font_mid, fill=self.text_color)
@@ -238,25 +261,29 @@ class TwitterImageGenerator:
         return output_path
 
 # Example usage function
-def create_twitter_image(game_data):
+def create_twitter_image(game_data, test_mode=False):
     """Create a Twitter image for the given game data"""
     generator = TwitterImageGenerator()
     
     # Create filename based on game info
     filename = f"lineup_{game_data['away_team'].replace(' ', '_')}_vs_{game_data['home_team'].replace(' ', '_')}_{game_data['game_id']}.png"
     
-    # Get today's date for folder organization
-    from datetime import datetime
-    today = datetime.now().strftime('%Y-%m-%d')
-    
-    # Create date-based folder structure
+    # Create folder structure
     base_images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'images')
-    date_folder = os.path.join(base_images_dir, today)
-    os.makedirs(date_folder, exist_ok=True)
     
-    # Save to date-specific folder
-    output_path = os.path.join(date_folder, filename)
-    
-    print(f"📁 Saving to date folder: {today}")
+    if test_mode:
+        # Use testImages folder for test mode
+        test_folder = os.path.join(base_images_dir, 'testImages')
+        os.makedirs(test_folder, exist_ok=True)
+        output_path = os.path.join(test_folder, filename)
+        print(f"📁 Saving to test folder: testImages")
+    else:
+        # Use date-based folder for normal mode
+        from datetime import datetime
+        today = datetime.now().strftime('%Y-%m-%d')
+        date_folder = os.path.join(base_images_dir, today)
+        os.makedirs(date_folder, exist_ok=True)
+        output_path = os.path.join(date_folder, filename)
+        print(f"📁 Saving to date folder: {today}")
     
     return generator.create_lineup_image(game_data, output_path) 

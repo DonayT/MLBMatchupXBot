@@ -1,0 +1,10 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "python.terminal.activateEnvironment": false,
+    "python.terminal.activateEnvInCurrentTerminal": false,
+    "python.pythonPath": "C:\\Users\\tyler\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+    "python.analysis.extraPaths": [
+        "./MLB_Matchup/src",
+        "./Xbot"
+    ]
+} 

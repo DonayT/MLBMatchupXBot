@@ -1,8 +1,6 @@
 name: Run MLB Matchup Bot
 
 on:
-  schedule:
-    - cron: "*/5 * * * *" # Every 15 minutes
   workflow_dispatch: # Optional: lets you manually trigger from GitHub
   repository_dispatch:
     types: [scheduled-run]

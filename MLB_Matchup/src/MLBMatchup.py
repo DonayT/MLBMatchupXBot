@@ -81,16 +81,14 @@ def get_game_data(game):
 
     venue_id = game.get('venue_id')
     venue_name = 'Unknown Venue'
-    print(venue_name)
+    
 
     if venue_id:
         venue_data = statsapi.get('venue', {'venueIds': venue_id})
         venue = venue_data['venues'][0]
         pprint.pprint(venue)
         venue_name = venue.get('name', 'Unknown Venue')
-        city = venue.get('city', 'Unknown')
-        state = venue.get('state', 'Unknown')
-        print(city, state)
+        print(venue_name)
 
     print(game.keys())
     

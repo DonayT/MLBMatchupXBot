@@ -16,8 +16,39 @@ from twitter_image_generator import create_twitter_image
 from game_data_processor import GameDataProcessor
 from MLB_API_Client import MLBAPIClient
 
-# Import mock data function
-from config.mock_game_data import create_mock_game_data
+def create_mock_game_data():
+    """Create mock game data for testing"""
+    return {
+        'game_id': '123456',
+        'away_team': 'Boston Red Sox',
+        'home_team': 'New York Yankees',
+        'away_pitcher': 'Chris Sale',
+        'home_pitcher': 'Gerrit Cole',
+        'game_date': '08/15/2025',
+        'venue': 'Yankee Stadium',
+        'away_lineup': [
+            {'order': 1, 'name': 'Mookie Betts', 'position': 'RF'},
+            {'order': 2, 'name': 'Rafael Devers', 'position': '3B'},
+            {'order': 3, 'name': 'J.D. Martinez', 'position': 'DH'},
+            {'order': 4, 'name': 'Xander Bogaerts', 'position': 'SS'},
+            {'order': 5, 'name': 'Christian Vazquez', 'position': 'C'},
+            {'order': 6, 'name': 'Andrew Benintendi', 'position': 'LF'},
+            {'order': 7, 'name': 'Jackie Bradley Jr.', 'position': 'CF'},
+            {'order': 8, 'name': 'Mitch Moreland', 'position': '1B'},
+            {'order': 9, 'name': 'Dustin Pedroia', 'position': '2B'},
+        ],
+        'home_lineup': [
+            {'order': 1, 'name': 'DJ LeMahieu', 'position': '2B'},
+            {'order': 2, 'name': 'Aaron Judge', 'position': 'RF'},
+            {'order': 3, 'name': 'Giancarlo Stanton', 'position': 'DH'},
+            {'order': 4, 'name': 'Gary Sanchez', 'position': 'C'},
+            {'order': 5, 'name': 'Gleyber Torres', 'position': 'SS'},
+            {'order': 6, 'name': 'Luke Voit', 'position': '1B'},
+            {'order': 7, 'name': 'Brett Gardner', 'position': 'CF'},
+            {'order': 8, 'name': 'Miguel Andujar', 'position': '3B'},
+            {'order': 9, 'name': 'Clint Frazier', 'position': 'LF'},
+        ]
+    }
 
 def get_real_game_data():
     """Get real game data from MLB API using modularized code"""

@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import get_address
 from lineup_validator import LineupValidator
+import re
 
 class MLBAPIClient: 
     def __init__ (self):
@@ -27,6 +28,42 @@ class MLBAPIClient:
         except Exception as e:
             print(f"Error fetching venue data for venue_id {venue_id}: {e}")
             return None
+
+    def get_team_records(self):
+        """Get current team records as a dictionary"""
+        try:
+            standings = statsapi.standings()
+            team_records = {}
+            
+            # Parse the standings string to extract team names and W-L records
+            lines = standings.split('\n')
+            
+            for line in lines:
+                # Look for lines that contain team names and W-L records
+                match = re.search(r'\s+\d+\s+([A-Za-z\s\.]+)\s+(\d+)\s+(\d+)', line)
+                if match:
+                    team_name = match.group(1).strip()
+                    wins = int(match.group(2))
+                    losses = int(match.group(3))
+                    
+                    # Skip empty team names (parsing errors)
+                    if team_name and len(team_name) > 2:
+                        team_records[team_name] = {
+                            'wins': wins,
+                            'losses': losses,
+                            'record': f"{wins}-{losses}"
+                        }
+            
+            return team_records
+            
+        except Exception as e:
+            print(f"Error getting team records: {e}")
+            return {}
+
+    def get_team_record(self, team_name):
+        """Get record for a specific team"""
+        team_records = self.get_team_records()
+        return team_records.get(team_name, {'wins': 0, 'losses': 0, 'record': '0-0'})
 
     def format_game_datetime(self, game_datetime, game_date):
         if game_datetime:

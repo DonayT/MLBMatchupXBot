@@ -5,6 +5,7 @@ import os
 import json
 import get_address
 import get_stats
+from MLB_API_Client import MLBAPIClient
 
 class TwitterImageGenerator:
     def __init__(self):
@@ -21,6 +22,9 @@ class TwitterImageGenerator:
         self.team_colors = self.load_team_colors()
         self.team_secondary_colors = self.load_team_secondary_colors()
         
+        # Initialize MLB API Client for team records
+        self.mlb_client = MLBAPIClient()
+        
         # Fonts - load from config folder
         config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config')
         
@@ -35,6 +39,7 @@ class TwitterImageGenerator:
             self.font_mid = ImageFont.truetype(worksans_regular_path, 22)  # Time, stadium, location
             self.font_bold = ImageFont.truetype(worksans_bold_path, 30)  # Player names
             self.font_reg = ImageFont.truetype(worksans_regular_path, 30)  # Positions
+            self.font_record = ImageFont.truetype(worksans_bold_path, 24)  # Team records
         except Exception as e:
             try:
                 # Fallback to common system fonts
@@ -43,6 +48,7 @@ class TwitterImageGenerator:
                 self.font_mid = ImageFont.truetype("arial.ttf", 22)     # Regular Arial for info
                 self.font_bold = ImageFont.truetype("arialbd.ttf", 33)  # Bold Arial for names
                 self.font_reg = ImageFont.truetype("arial.ttf", 33)     # Regular Arial for positions
+                self.font_record = ImageFont.truetype("arialbd.ttf", 26)  # Bold Arial for records
             except Exception as e2:
                 # Final fallback to default font
                 self.font_big = ImageFont.load_default()
@@ -50,6 +56,7 @@ class TwitterImageGenerator:
                 self.font_mid = ImageFont.load_default()
                 self.font_bold = ImageFont.load_default()
                 self.font_reg = ImageFont.load_default()
+                self.font_record = ImageFont.load_default()
     
     def load_team_colors(self):
         """Load team colors from JSON file"""
@@ -158,13 +165,25 @@ class TwitterImageGenerator:
         x, y = self.get_centered_text_xy(draw, location, self.font_mid, (400, 40))
         draw.text((x, 160), location, font=self.font_mid, fill=self.text_color)
 
-        # Draw team records - centered below abbreviations
-        # away_record = get_stats.get_team_record(game_data['away_team'])
-        # home_record = get_stats.get_team_record(game_data['home_team'])
-        # x, y = self.get_centered_text_xy(draw, away_record, self.font_mid, (400, 40))
-        # draw.text((x, 200), away_record, font=self.font_mid, fill=self.text_color)
-        # x, y = self.get_centered_text_xy(draw, home_record, self.font_mid, (400, 40))
-        # draw.text((x, 230), home_record, font=self.font_mid, fill=self.text_color)
+        # Get and draw team records - centered below abbreviations
+        try:
+            away_team_record = self.mlb_client.get_team_record(game_data['away_team'])
+            home_team_record = self.mlb_client.get_team_record(game_data['home_team'])
+            
+            away_record = away_team_record['record']
+            home_record = home_team_record['record']
+        except Exception as e:
+            print(f"Error getting team records: {e}")
+            away_record = 'N/A'
+            home_record = 'N/A'
+        
+        # Draw away team record (left side)
+        x, y = self.get_centered_text_xy(draw, away_record, self.font_record, (160, 200))
+        draw.text((x, y), away_record, font=self.font_record, fill=away_color)
+        
+        # Draw home team record (right side)
+        x, y = self.get_centered_text_xy(draw, home_record, self.font_record, (640, 200))
+        draw.text((x, y), home_record, font=self.font_record, fill=home_color)
         
         # Draw lineups - just the text, no table drawing
         away_lineup = game_data.get('away_lineup', [])

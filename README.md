@@ -159,6 +159,7 @@ python MLB_Matchup/src/debug_team_records.py
 5. Submit a pull request
 
 ## 📝 License
+If you use or modify this code, please credit the original authors in your documentation, README, or software credits.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 

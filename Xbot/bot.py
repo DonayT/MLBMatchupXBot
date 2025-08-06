@@ -68,11 +68,8 @@ def main():
             "Request returned an error: {} {}".format(response.status_code, response.text)
         )
 
-    print("Response code: {}".format(response.status_code))
-
     # Saving the response as JSON
     json_response = response.json()
-    print(json.dumps(json_response, indent=4, sort_keys=True))
 
 if __name__ == "__main__":
     main()

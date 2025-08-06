@@ -184,10 +184,8 @@ def process_games():
     today = datetime.now().strftime('%Y-%m-%d')
     
     # Check for date transition and organize images
-    print("Checking date organization...")
     date_changed = check_date_transition()
     organize_existing_images()
-    print()
     
     # Initialize queue
     game_queue = GameQueue()
@@ -198,36 +196,20 @@ def process_games():
     # Get only unprocessed games
     unprocessed_games = game_queue.get_unprocessed_games(schedule)
     
-    print(f"Processing {len(unprocessed_games)} unprocessed games for {today}")
-    print(f"Total games today: {len(schedule)}")
-    print(f"Already processed: {len(schedule) - len(unprocessed_games)}")
-    print()
-    
     # Check if all games are processed
     if len(unprocessed_games) == 0:
-        print("All games for today have been processed!")
-        print("No more games to check - all lineups are complete!")
         return "ALL_DONE"
     
     for game in unprocessed_games:
         game_data = get_game_data(game)
         
-        print(f" {game_data['away_team']} @ {game_data['home_team']} - Game ID: {game_data['game_id']}")
-        print(f"   Home SP: {game_data['home_pitcher']}")
-        print(f"   Away SP: {game_data['away_pitcher']}")
-        print(f"   Lineups Official: {game_data['lineups_official']}")
-        
         if game_data['lineups_official']:
-            print("  Both lineups are official - generating image!")
-            
             # Generate Twitter image
             try:
                 image_path = create_twitter_image(game_data)
-                print(f"   Twitter image created: {image_path}")
                 
                 # Mark as processed
                 game_queue.mark_processed(game_data['game_id'])
-                print(f"   Game {game_data['game_id']} marked as processed")
 
                 # Upload image to Twitter
                 upload_image_to_twitter(image_path, game_data)
@@ -235,16 +217,13 @@ def process_games():
             except Exception as e:
                 print(f"   Error creating image: {e}")
         else:
-            print("   Waiting for lineups to become official...")
-        
-        print()
+            pass
     
     return "CONTINUE"
 
 if __name__ == "__main__":
     result = process_games()
     if result == "ALL_DONE":
-        print("✅ All games processed successfully - exiting cleanly")
         exit(0)  # Success exit code for "all done"
     else:
         exit(0)   # Normal exit

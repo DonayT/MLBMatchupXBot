@@ -18,15 +18,11 @@ def check_date_transition():
         
         # If it's a new date, we need to reset
         if last_date != today:
-            print(f"Date changed from {last_date} to {today}")
-            print("Resetting processed games for new day...")
-            
             # Clear processed games for new day
             processed_games_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'processed_games.json')
             if os.path.exists(processed_games_file):
                 with open(processed_games_file, 'w') as f:
                     json.dump([], f)
-                print("Cleared processed games list")
             
             # Update last processed date
             with open(last_processed_file, 'w') as f:
@@ -37,7 +33,6 @@ def check_date_transition():
         # First time running, create the file
         with open(last_processed_file, 'w') as f:
             f.write(today)
-        print(f"First run - setting date to {today}")
     
     return False
 
@@ -55,8 +50,6 @@ def organize_existing_images():
             loose_images.append(file)
     
     if loose_images:
-        print(f"Found {len(loose_images)} loose images to organize...")
-        
         for image_file in loose_images:
             # Try to extract date from filename or use today's date
             try:
@@ -79,13 +72,6 @@ def organize_existing_images():
                 
                 if not os.path.exists(new_path):  # Don't overwrite
                     shutil.move(old_path, new_path)
-                    print(f"  Moved {image_file} to {date_folder}/")
-                else:
-                    print(f"  {image_file} already exists in {date_folder}/")
                     
             except Exception as e:
-                print(f"  Error organizing {image_file}: {e}")
-        
-        print("Image organization complete!")
-    else:
-        print("No loose images to organize") 
+                pass 

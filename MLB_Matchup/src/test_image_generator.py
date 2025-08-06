@@ -161,96 +161,50 @@ def create_mock_game_data():
 def get_real_game_data():
     """Get real game data from MLB API"""
     try:
-        print("🔍 Fetching real game data from MLB API...")
-        
         # Get today's schedule
         today = datetime.now().strftime('%Y-%m-%d')
         schedule = statsapi.schedule(start_date=today, end_date=today)
         
-        print(f"📅 Found {len(schedule)} games for today ({today})")
-        
         if len(schedule) == 0:
-            print("❌ No games found for today")
             return None
         
         # Get the first game with official lineups
         for game in schedule:
-            print(f"🏟️ Checking game: {game['away_name']} @ {game['home_name']}")
-            
             game_data = get_game_data(game)
             
-            print(f"   Lineups Official: {game_data['lineups_official']}")
-            print(f"   Away Lineup: {len(game_data['away_lineup'])} players")
-            print(f"   Home Lineup: {len(game_data['home_lineup'])} players")
-            
             if game_data['lineups_official']:
-                print("✅ Found game with official lineups!")
                 return game_data
-            else:
-                print("   ⏳ Waiting for lineups to become official...")
         
-        print("❌ No games with official lineups found")
         return None
         
     except Exception as e:
-        print(f"❌ Error fetching real game data: {e}")
-        import traceback
-        traceback.print_exc()
         return None
 
 def create_test_image():
     """Generate a test lineup image with real or mock data"""
     
-    print("🎯 Creating test lineup image...")
-    
     # Try to get real game data first
     test_data = get_real_game_data()
     
     if test_data is None:
-        print("📝 Using mock data (no real games available)")
         test_data = create_mock_game_data()
     
     try:
-        # Debug: Print team names and check JSON loading
-        print("🔍 Debugging team data:")
-        print(f"   Away team: '{test_data['away_team']}'")
-        print(f"   Home team: '{test_data['home_team']}'")
-        
         # Generate the image in test mode
         image_path = create_twitter_image(test_data, test_mode=True)
         
-        print("✅ Test image generated successfully!")
-        print(f"📁 Image saved to: {image_path}")
-        
-        # Check if file exists
-        if os.path.exists(image_path):
-            file_size = os.path.getsize(image_path)
-            print(f"📏 File size: {file_size:,} bytes")
-        else:
-            print("❌ Error: Image file not found!")
-            
         return image_path
         
     except Exception as e:
-        print(f"❌ Error generating test image: {e}")
-        import traceback
-        traceback.print_exc()
         return None
 
 def main():
     """Main function to run the test image generator"""
     
-    print("🚀 MLB Lineup Bot - Test Image Generator")
-    print("=" * 50)
-    
     # Generate test image
     image_path = create_test_image()
     
-    if image_path:
-        print("\n🎉 Test completed successfully!")
-        print(f"📸 Check your image at: {image_path}")
-    else:
-        print("\n💥 Test failed!")
+    if not image_path:
         sys.exit(1)
 
 if __name__ == "__main__":

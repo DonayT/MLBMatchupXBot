@@ -9,7 +9,6 @@ def load_state_abbreviations():
         with open(config_path, "r") as f:
             return json.load(f)
     except Exception as e:
-        print(f"Error loading state abbreviations: {e}")
         return {}
 
 def convert_state_to_abbreviation(state_name):
@@ -33,12 +32,10 @@ def get_city_state(place_name):
     try:
         location = geolocator.geocode(place_name)
     except Exception as e:
-        print(f"Geocoding error for {place_name}: {e}")
         return None
 
     if location:
         address = location.raw.get('display_name', '')
-        print(address)
         parts = address.split(', ')
         
         # Try to find city and state from address parts
@@ -68,10 +65,8 @@ def get_city_state(place_name):
             state_abbr = convert_state_to_abbreviation(state)
             return f"{city}, {state_abbr}"
         else:
-            print("City and state not found in address")
             return None
     else:
-        print("Location not found")
         return None
 
 
@@ -79,14 +74,11 @@ def get_city_state(place_name):
 # Example usage
 if __name__ == "__main__":
     # Test state abbreviation function
-    print("Testing state abbreviation function:")
     test_states = ["New York", "California", "Texas", "Florida", "Unknown State"]
     for state in test_states:
         abbr = convert_state_to_abbreviation(state)
-        print(f"  {state} -> {abbr}")
     
-    print("\nTesting city/state function:")
+    # Test city/state function
     places = ["Empire State Building", "PNC Park", "Polk Theatre"]
     for place in places:
         result = get_city_state(place)
-        print(f"  {place} -> {result}")

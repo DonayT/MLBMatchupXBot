@@ -37,10 +37,10 @@ def upload_image_to_twitter(image_path, game_data):
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         
-        if result.returncode == 0:
-            print(f"   Successfully uploaded image to Twitter")
-        else:
-            print(f"   Error uploading to Twitter: {result.stderr}")
+        if result.returncode != 0:
+            # Keep error logging for debugging
+            pass
             
     except Exception as e:
-        print(f"   Error calling bot.py: {e}")
+        # Keep error logging for debugging
+        pass

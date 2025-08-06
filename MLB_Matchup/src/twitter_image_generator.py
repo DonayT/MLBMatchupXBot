@@ -4,7 +4,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import json
 import get_address
-import get_stats
 from MLB_API_Client import MLBAPIClient
 
 class TwitterImageGenerator:

@@ -4,3 +4,4 @@ python-dotenv
 MLB-StatsAPI
 Pillow
 geopy
+pybaseball

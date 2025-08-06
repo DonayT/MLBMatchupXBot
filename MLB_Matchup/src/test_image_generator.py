@@ -16,6 +16,9 @@ from twitter_image_generator import create_twitter_image
 from game_data_processor import GameDataProcessor
 from MLB_API_Client import MLBAPIClient
 
+# Import mock data function
+from config.mock_game_data import create_mock_game_data
+
 def get_real_game_data():
     """Get real game data from MLB API using modularized code"""
     try:

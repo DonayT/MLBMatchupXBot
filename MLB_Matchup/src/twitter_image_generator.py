@@ -159,12 +159,12 @@ class TwitterImageGenerator:
         draw.text((x, 160), location, font=self.font_mid, fill=self.text_color)
 
         # Draw team records - centered below abbreviations
-        away_record = get_stats.get_team_record(game_data['away_team'])
-        home_record = get_stats.get_team_record(game_data['home_team'])
-        x, y = self.get_centered_text_xy(draw, away_record, self.font_mid, (400, 40))
-        draw.text((x, 200), away_record, font=self.font_mid, fill=self.text_color)
-        x, y = self.get_centered_text_xy(draw, home_record, self.font_mid, (400, 40))
-        draw.text((x, 230), home_record, font=self.font_mid, fill=self.text_color)
+        # away_record = get_stats.get_team_record(game_data['away_team'])
+        # home_record = get_stats.get_team_record(game_data['home_team'])
+        # x, y = self.get_centered_text_xy(draw, away_record, self.font_mid, (400, 40))
+        # draw.text((x, 200), away_record, font=self.font_mid, fill=self.text_color)
+        # x, y = self.get_centered_text_xy(draw, home_record, self.font_mid, (400, 40))
+        # draw.text((x, 230), home_record, font=self.font_mid, fill=self.text_color)
         
         # Draw lineups - just the text, no table drawing
         away_lineup = game_data.get('away_lineup', [])

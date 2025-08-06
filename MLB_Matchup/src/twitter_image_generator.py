@@ -22,7 +22,6 @@ class TwitterImageGenerator:
         
         # Fonts - load from config folder
         config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config')
-        print(f"Looking for fonts in: {config_path}")
         
         try:
             # Load fonts from config folder
@@ -30,19 +29,12 @@ class TwitterImageGenerator:
             worksans_regular_path = os.path.join(config_path, "WorkSans-Regular.ttf")
             worksans_bold_path = os.path.join(config_path, "WorkSans-Bold.ttf")
             
-            print(f"Checking if font files exist:")
-            print(f"  Anton.ttf: {os.path.exists(anton_path)}")
-            print(f"  WorkSans-Regular.ttf: {os.path.exists(worksans_regular_path)}")
-            print(f"  WorkSans-Bold.ttf: {os.path.exists(worksans_bold_path)}")
-            
             self.font_big = ImageFont.truetype(anton_path, 182)  # Team abbreviations
             self.font_vs = ImageFont.truetype(anton_path, 60)    # VS text
             self.font_mid = ImageFont.truetype(worksans_regular_path, 22)  # Time, stadium, location
             self.font_bold = ImageFont.truetype(worksans_bold_path, 30)  # Player names
             self.font_reg = ImageFont.truetype(worksans_regular_path, 30)  # Positions
-            print("Successfully loaded custom fonts!")
         except Exception as e:
-            print(f"Failed to load custom fonts: {e}")
             try:
                 # Fallback to common system fonts
                 self.font_big = ImageFont.truetype("arialbd.ttf", 182)  # Bold Arial for abbreviations
@@ -50,57 +42,42 @@ class TwitterImageGenerator:
                 self.font_mid = ImageFont.truetype("arial.ttf", 22)     # Regular Arial for info
                 self.font_bold = ImageFont.truetype("arialbd.ttf", 33)  # Bold Arial for names
                 self.font_reg = ImageFont.truetype("arial.ttf", 33)     # Regular Arial for positions
-                print("Using Arial fonts as fallback")
             except Exception as e2:
-                print(f"Failed to load Arial fonts: {e2}")
                 # Final fallback to default font
                 self.font_big = ImageFont.load_default()
                 self.font_vs = ImageFont.load_default()
                 self.font_mid = ImageFont.load_default()
                 self.font_bold = ImageFont.load_default()
                 self.font_reg = ImageFont.load_default()
-                print("Using system default fonts")
     
     def load_team_colors(self):
         """Load team colors from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamPrimaryColors.json')
-            print(f"🔍 Loading team colors from: {config_path}")
-            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
                 data = json.load(f)
-                print(f"   Loaded {len(data)} team colors")
                 return data
         except Exception as e:
-            print(f"❌ Error loading team colors: {e}")
             return {}
     
     def load_team_secondary_colors(self):
         """Load team secondary colors from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamSecondaryColors.json')
-            print(f"🔍 Loading team secondary colors from: {config_path}")
-            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
                 data = json.load(f)
-                print(f"   Loaded {len(data)} team secondary colors")
                 return data
         except Exception as e:
-            print(f"❌ Error loading team secondary colors: {e}")
             return {}
     
     def load_team_abbreviations(self):
         """Load team abbreviations from JSON file"""
         try:
             config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'teamAbreviations.json')
-            print(f"🔍 Loading team abbreviations from: {config_path}")
-            print(f"   File exists: {os.path.exists(config_path)}")
             with open(config_path, "r") as f:
                 data = json.load(f)
-                print(f"   Loaded {len(data)} team abbreviations")
                 return data
         except Exception as e:
-            print(f"❌ Error loading team abbreviations: {e}")
             return {}
 
     def get_centered_text_xy(self, draw, text, font, center):
@@ -136,15 +113,6 @@ class TwitterImageGenerator:
         home_abr = team_abbreviations.get(game_data['home_team'], game_data['home_team'][:3].upper())
         away_color = self.team_colors.get(game_data['away_team'])
         home_color = self.team_colors.get(game_data['home_team'])
-        
-        # Debug: Print team data
-        print(f"🎨 Team Colors Debug:")
-        print(f"   Away team: '{game_data['away_team']}' -> Color: {away_color}")
-        print(f"   Home team: '{game_data['home_team']}' -> Color: {home_color}")
-        print(f"   Away abbreviation: '{away_abr}'")
-        print(f"   Home abbreviation: '{home_abr}'")
-        print(f"   Available team colors: {list(self.team_colors.keys())[:5]}...")
-        print(f"   Available abbreviations: {list(team_abbreviations.keys())[:5]}...")
         
         # Draw team abbreviations at top with outlines - positioned like reference image
         # Away team abbreviation with outline
@@ -264,7 +232,6 @@ class TwitterImageGenerator:
         
         # Save the image
         image.save(output_path)
-        print(f"Twitter image saved: {output_path}")
         
         return output_path
 
@@ -284,7 +251,6 @@ def create_twitter_image(game_data, test_mode=False):
         test_folder = os.path.join(base_images_dir, 'testImages')
         os.makedirs(test_folder, exist_ok=True)
         output_path = os.path.join(test_folder, filename)
-        print(f"📁 Saving to test folder: testImages")
     else:
         # Use date-based folder for normal mode
         from datetime import datetime
@@ -292,6 +258,5 @@ def create_twitter_image(game_data, test_mode=False):
         date_folder = os.path.join(base_images_dir, today)
         os.makedirs(date_folder, exist_ok=True)
         output_path = os.path.join(date_folder, filename)
-        print(f"📁 Saving to date folder: {today}")
     
     return generator.create_lineup_image(game_data, output_path) 

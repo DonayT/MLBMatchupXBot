@@ -1,8 +1,16 @@
 # MLBMatchupXBot
 
+<div align="center">
+  <img src="MLB_Matchup/images/logo/MLBMatchupBotLogo.png" alt="MLBMatchupXBot Logo" width="200"/>
+  <br>
+  <em>Automated MLB Lineup Cards with Enhanced Statistics</em>
+</div>
+
 An automated X (Twitter) bot that posts daily Major League Baseball (MLB) lineup cards with enhanced statistics and modern design.
 
 **X Profile**: https://x.com/MLB_Matchup_Bot
+
+**Automation**: Powered by [cron-job.org](https://cron-job.org) and [GitHub Actions](https://github.com/features/actions) for reliable scheduled posting
 
 ## 🏟️ Features
 
@@ -75,6 +83,20 @@ python MLB_Matchup/src/MLBMatchup.py
 # Test image generation
 python MLB_Matchup/src/test_image_generator.py
 ```
+
+### Automation Setup
+The bot uses multiple automation strategies for reliability:
+
+#### cron-job.org
+- **Schedule**: Runs every 15 minutes during MLB season
+- **Endpoint**: `https://your-deployment-url.com/trigger`
+- **Monitoring**: Email notifications for failures
+
+#### GitHub Actions
+- **Schedule**: Runs every 30 minutes via GitHub Actions cron
+- **Workflow**: `.github/workflows/mlb-bot.yml`
+- **Fallback**: Automatic retry on failures
+- **Logs**: Available in GitHub Actions tab
 
 ## 🔧 Architecture
 

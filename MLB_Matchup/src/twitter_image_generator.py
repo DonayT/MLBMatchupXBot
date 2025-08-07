@@ -39,6 +39,7 @@ class TwitterImageGenerator:
             self.font_bold = ImageFont.truetype(worksans_bold_path, 30)  # Player names
             self.font_reg = ImageFont.truetype(worksans_regular_path, 30)  # Positions
             self.font_record = ImageFont.truetype(worksans_bold_path, 24)  # Team records
+            self.font_stats = ImageFont.truetype(worksans_regular_path, 18)  # Player stats
         except Exception as e:
             try:
                 # Fallback to common system fonts
@@ -48,6 +49,7 @@ class TwitterImageGenerator:
                 self.font_bold = ImageFont.truetype("arialbd.ttf", 33)  # Bold Arial for names
                 self.font_reg = ImageFont.truetype("arial.ttf", 33)     # Regular Arial for positions
                 self.font_record = ImageFont.truetype("arialbd.ttf", 26)  # Bold Arial for records
+                self.font_stats = ImageFont.truetype("arial.ttf", 20)   # Regular Arial for stats
             except Exception as e2:
                 # Final fallback to default font
                 self.font_big = ImageFont.load_default()
@@ -56,6 +58,7 @@ class TwitterImageGenerator:
                 self.font_bold = ImageFont.load_default()
                 self.font_reg = ImageFont.load_default()
                 self.font_record = ImageFont.load_default()
+                self.font_stats = ImageFont.load_default()
     
     def load_team_colors(self):
         """Load team colors from JSON file"""
@@ -190,7 +193,7 @@ class TwitterImageGenerator:
         
         # Define positions for text (you'll need to adjust these to match your template)
         YvalTopCell = 250
-        rowHeight = 78
+        rowHeight = 90  # Increased row height to accommodate stats
         maximumNameWidth = 300
         
         # Pitcher names with separate SP label and name fields
@@ -218,6 +221,7 @@ class TwitterImageGenerator:
                 player = away_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
+                stats = player.get('recent_stats', '')
 
                 # Shorten name if too wide
                 name_bbox = draw.textbbox((0, 0), name, font=self.font_bold)
@@ -230,12 +234,18 @@ class TwitterImageGenerator:
                 draw.text((x, y+22), pos, font=self.font_reg, fill="black")
                 x, n = self.get_centered_text_xy(draw, name, self.font_bold, (240, 40))
                 draw.text((x, y+22), name, font=self.font_bold, fill="black")
+                
+                # Draw stats below the name
+                if stats and stats != "No recent data":
+                    x, n = self.get_centered_text_xy(draw, stats, self.font_stats, (240, 40))
+                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")
             
             # Home team lineup (right column)
             if i < len(home_lineup):
                 player = home_lineup[i]
                 pos = player.get('position', '')
                 name = player.get('name', '')
+                stats = player.get('recent_stats', '')
 
                 # Shorten name if too wide
                 name_bbox = draw.textbbox((0, 0), name, font=self.font_bold)
@@ -248,6 +258,11 @@ class TwitterImageGenerator:
                 draw.text((x, y+22), pos, font=self.font_reg, fill="black")
                 x, n = self.get_centered_text_xy(draw, name, self.font_bold, (640, 40))
                 draw.text((x, y+22), name, font=self.font_bold, fill="black")
+                
+                # Draw stats below the name
+                if stats and stats != "No recent data":
+                    x, n = self.get_centered_text_xy(draw, stats, self.font_stats, (640, 40))
+                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")
         
         # Save the image
         image.save(output_path)

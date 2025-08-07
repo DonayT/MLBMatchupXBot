@@ -59,11 +59,13 @@ MLBMatchupXBot/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.8+
 - MLB Stats API access
 - Twitter API credentials
 
 ### Installation
+
 ```bash
 git clone https://github.com/yourusername/MLBMatchupXBot.git
 cd MLBMatchupXBot
@@ -71,11 +73,13 @@ pip install -r requirements.txt
 ```
 
 ### Configuration
+
 1. Set up Twitter API credentials in `Xbot/bot.py`
 2. Configure MLB API settings in `MLB_Matchup/src/MLB_API_Client.py`
 3. Customize team colors and hashtags in `MLB_Matchup/config/`
 
 ### Running the Bot
+
 ```bash
 # Run the main bot
 python MLB_Matchup/src/MLBMatchup.py
@@ -85,14 +89,17 @@ python MLB_Matchup/src/test_image_generator.py
 ```
 
 ### Automation Setup
+
 The bot uses multiple automation strategies for reliability:
 
 #### cron-job.org
+
 - **Schedule**: Runs every 15 minutes during MLB season
 - **Endpoint**: `https://your-deployment-url.com/trigger`
 - **Monitoring**: Email notifications for failures
 
 #### GitHub Actions
+
 - **Schedule**: Runs every 30 minutes via GitHub Actions cron
 - **Workflow**: `.github/workflows/mlb-bot.yml`
 - **Fallback**: Automatic retry on failures
@@ -124,6 +131,7 @@ The bot uses multiple automation strategies for reliability:
 ## 🎨 Image Generation
 
 The bot creates professional lineup cards featuring:
+
 - Team abbreviations with custom fonts
 - Player names, positions, and batting order
 - Starting pitcher information
@@ -159,6 +167,7 @@ python MLB_Matchup/src/debug_team_records.py
 5. Submit a pull request
 
 ## 📝 License
+
 If you use or modify this code, please credit the original authors in your documentation, README, or software credits.
 
 This project is licensed under the MIT License - see the LICENSE file for details.

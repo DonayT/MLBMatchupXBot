@@ -177,11 +177,11 @@ class TwitterImageGenerator:
             home_record = 'N/A'
         
         # Draw away team record (left side)
-        x, y = self.get_centered_text_xy(draw, away_record, self.font_record, (160, 200))
+        x, y = self.get_centered_text_xy(draw, away_record, self.font_record, (160, 190))
         draw.text((x, y), away_record, font=self.font_record, fill=away_color)
         
         # Draw home team record (right side)
-        x, y = self.get_centered_text_xy(draw, home_record, self.font_record, (640, 200))
+        x, y = self.get_centered_text_xy(draw, home_record, self.font_record, (640, 190))
         draw.text((x, y), home_record, font=self.font_record, fill=home_color)
         
         # Draw lineups - just the text, no table drawing

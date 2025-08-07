@@ -3,6 +3,12 @@ Test file for get_stats.py module
 Tests player stats retrieval for specific players
 """
 
+import sys
+import os
+
+# Add the src directory to the path so we can import modules
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+
 from get_stats import initialize_stats_cache, get_player_stats, get_cached_stats, clear_stats_cache
 
 def test_player_stats():

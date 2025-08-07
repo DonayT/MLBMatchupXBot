@@ -266,8 +266,8 @@ def create_twitter_image(game_data, test_mode=False):
     base_images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'images')
     
     if test_mode:
-        # Use testImages folder for test mode
-        test_folder = os.path.join(base_images_dir, 'testImages')
+        # Use test folder for test mode
+        test_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'test', 'testImages')
         os.makedirs(test_folder, exist_ok=True)
         output_path = os.path.join(test_folder, filename)
     else:

@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime, timedelta
 import json
+from get_stats import initialize_stats_cache
 
 def check_date_transition():
     """Check if we've moved to a new date and need to reset processed games"""
@@ -23,6 +24,11 @@ def check_date_transition():
             if os.path.exists(processed_games_file):
                 with open(processed_games_file, 'w') as f:
                     json.dump([], f)
+            
+            # Initialize fresh stats cache for new day
+            print("New day detected - initializing fresh stats cache...")
+            initialize_stats_cache()
+            print("Stats cache initialized for new day!")
             
             # Update last processed date
             with open(last_processed_file, 'w') as f:

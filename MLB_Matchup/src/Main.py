@@ -6,6 +6,7 @@ from game_queue import GameQueue
 from date_organizer import check_date_transition, organize_existing_images
 from twitter_image_generator import create_twitter_image
 from x_uploader import upload_image_to_twitter
+from get_stats import clear_stats_cache
 
 class Main:
     def __init__(self):
@@ -34,6 +35,12 @@ class Main:
         if len(unprocessed_games) == 0:
             print("All games for today have been processed!")
             print("No more games to check - all lineups are complete!")
+            
+            # Clear stats cache to ensure fresh data for next day
+            print("Clearing stats cache for fresh data tomorrow...")
+            clear_stats_cache()
+            print("Stats cache cleared successfully!")
+            
             return "ALL_DONE"
         
         for game in unprocessed_games:

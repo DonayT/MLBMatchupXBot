@@ -36,10 +36,10 @@ class TwitterImageGenerator:
             self.font_big = ImageFont.truetype(anton_path, 182)  # Team abbreviations
             self.font_vs = ImageFont.truetype(anton_path, 60)    # VS text
             self.font_mid = ImageFont.truetype(worksans_regular_path, 22)  # Time, stadium, location
-            self.font_bold = ImageFont.truetype(worksans_bold_path, 30)  # Player names
-            self.font_reg = ImageFont.truetype(worksans_regular_path, 30)  # Positions
+            self.font_bold = ImageFont.truetype(worksans_bold_path, 26)  # Player names - slightly bigger (was 24)
+            self.font_reg = ImageFont.truetype(worksans_regular_path, 26)  # Positions - slightly bigger (was 24)
             self.font_record = ImageFont.truetype(worksans_bold_path, 24)  # Team records
-            self.font_stats = ImageFont.truetype(worksans_regular_path, 18)  # Player stats
+            self.font_stats = ImageFont.truetype(worksans_regular_path, 17)  # Player stats - slightly bigger (was 16)
         except Exception as e:
             try:
                 # Fallback to common system fonts
@@ -193,28 +193,50 @@ class TwitterImageGenerator:
         
         # Define positions for text (you'll need to adjust these to match your template)
         YvalTopCell = 250
-        rowHeight = 90  # Increased row height to accommodate stats
+        rowHeight = 70  # Reduced from 90 to 70 to fit all players
         maximumNameWidth = 300
         
         # Pitcher names with separate SP label and name fields
         away_sp = game_data.get('away_pitcher', 'TBD')
         home_sp = game_data.get('home_pitcher', 'TBD')
-
+        
+        # Get pitcher data from lineup
+        away_pitchers = game_data.get('away_pitchers', [])
+        home_pitchers = game_data.get('home_pitchers', [])
+        
+        # Away pitcher
         x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (40, YvalTopCell))
         draw.text((x, y), "SP", font=self.font_reg, fill="black")
 
-        x, y = self.get_centered_text_xy(draw, away_sp, self.font_bold, (240, YvalTopCell))
-        draw.text((x, y), away_sp, font=self.font_bold, fill="black")
+        # Use actual pitcher name from lineup if available, otherwise use probable pitcher
+        away_pitcher_name = away_pitchers[0]['name'] if away_pitchers else away_sp
+        x, y = self.get_centered_text_xy(draw, away_pitcher_name, self.font_bold, (240, YvalTopCell))
+        draw.text((x, y), away_pitcher_name, font=self.font_bold, fill="black")
+        
+        # Draw away pitcher stats if available
+        if away_pitchers and away_pitchers[0].get('recent_stats') and away_pitchers[0]['recent_stats'] != "No recent data":
+            stats = away_pitchers[0]['recent_stats']
+            x, y = self.get_centered_text_xy(draw, stats, self.font_stats, (240, YvalTopCell))
+            draw.text((x, y+22), stats, font=self.font_stats, fill="gray")
 
+        # Home pitcher
         x, y = self.get_centered_text_xy(draw, "SP", self.font_reg, (440, YvalTopCell))
         draw.text((x, y), "SP", font=self.font_reg, fill="black")
 
-        x, y = self.get_centered_text_xy(draw, home_sp, self.font_bold, (640, YvalTopCell))
-        draw.text((x, y), home_sp, font=self.font_bold, fill="black")
+        # Use actual pitcher name from lineup if available, otherwise use probable pitcher
+        home_pitcher_name = home_pitchers[0]['name'] if home_pitchers else home_sp
+        x, y = self.get_centered_text_xy(draw, home_pitcher_name, self.font_bold, (640, YvalTopCell))
+        draw.text((x, y), home_pitcher_name, font=self.font_bold, fill="black")
+        
+        # Draw home pitcher stats if available
+        if home_pitchers and home_pitchers[0].get('recent_stats') and home_pitchers[0]['recent_stats'] != "No recent data":
+            stats = home_pitchers[0]['recent_stats']
+            x, y = self.get_centered_text_xy(draw, stats, self.font_stats, (640, YvalTopCell))
+            draw.text((x, y+22), stats, font=self.font_stats, fill="gray")
         
         # Draw lineup text only
         for i in range(9):
-            y = (YvalTopCell+45) + rowHeight*(i)
+            y = (YvalTopCell+45) + rowHeight*(i)  # Keep original starting position
             
             # Away team lineup (left column)
             if i < len(away_lineup):
@@ -231,14 +253,14 @@ class TwitterImageGenerator:
                         name = f"{parts[0][0]}. {' '.join(parts[1:])}"
 
                 x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (40, 40))
-                draw.text((x, y+22), pos, font=self.font_reg, fill="black")
+                draw.text((x, y+22), pos, font=self.font_reg, fill="black")  # Keep original position
                 x, n = self.get_centered_text_xy(draw, name, self.font_bold, (240, 40))
-                draw.text((x, y+22), name, font=self.font_bold, fill="black")
+                draw.text((x, y+22), name, font=self.font_bold, fill="black")  # Keep original position
                 
-                # Draw stats below the name
+                # Draw stats closer underneath the name
                 if stats and stats != "No recent data":
                     x, n = self.get_centered_text_xy(draw, stats, self.font_stats, (240, 40))
-                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")
+                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")  # Moved back to +45 to avoid overlap
             
             # Home team lineup (right column)
             if i < len(home_lineup):
@@ -255,14 +277,14 @@ class TwitterImageGenerator:
                         name = f"{parts[0][0]}. {' '.join(parts[1:])}"
 
                 x, n = self.get_centered_text_xy(draw, pos, self.font_reg, (440, 40))
-                draw.text((x, y+22), pos, font=self.font_reg, fill="black")
+                draw.text((x, y+22), pos, font=self.font_reg, fill="black")  # Keep original position
                 x, n = self.get_centered_text_xy(draw, name, self.font_bold, (640, 40))
-                draw.text((x, y+22), name, font=self.font_bold, fill="black")
+                draw.text((x, y+22), name, font=self.font_bold, fill="black")  # Keep original position
                 
-                # Draw stats below the name
+                # Draw stats closer underneath the name
                 if stats and stats != "No recent data":
                     x, n = self.get_centered_text_xy(draw, stats, self.font_stats, (640, 40))
-                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")
+                    draw.text((x, y+45), stats, font=self.font_stats, fill="gray")  # Moved back to +45 to avoid overlap
         
         # Save the image
         image.save(output_path)

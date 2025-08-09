@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import get_address
 from lineup_validator import LineupValidator
+from players_previous_games import get_player_last_5_games, get_pitcher_last_3_games
 import re
 
 class MLBAPIClient: 
@@ -94,7 +95,28 @@ class MLBAPIClient:
             print(f"Error getting city/state for {venue_name}: {e}")
             return 'Unknown City', 'Unknown State'
     
-    def extract_lineup_data(self, boxscore, side):
+    def extract_lineup_data_basic(self, boxscore, side):
+        """Extract basic lineup data without fetching player stats (for incomplete lineups)"""
+        batting_order = boxscore[side].get('battingOrder', [])
+        players = boxscore[side].get('players', {})
+        
+        lineup = []
+        if batting_order:
+            for idx, pid in enumerate(batting_order, 1):
+                player = players.get(f"ID{pid}", {})
+                name = player.get('person', {}).get('fullName', 'Unknown')
+                position = player.get('position', {}).get('abbreviation', '')
+                
+                lineup.append({
+                    'order': idx,
+                    'name': name,
+                    'position': position,
+                    'recent_stats': "No recent data"  # Placeholder for incomplete lineups
+                })
+        
+        return lineup
+    
+    def extract_lineup_data(self, boxscore, side, team_id=119):
         batting_order = boxscore[side].get('battingOrder', [])
         players = boxscore[side].get('players', {})
         
@@ -107,12 +129,18 @@ class MLBAPIClient:
                 
                 # Get player stats with better error handling
                 try:
-                    recent_stats = self.get_player_15_games_string(name)
-                    if isinstance(recent_stats, str) and not recent_stats.startswith('Error') and not recent_stats.startswith('No recent'):
-                        # Extract just the stats part (after the colon)
-                        stats_part = recent_stats.split(':\n')[-1] if ':\n' in recent_stats else recent_stats
-                        # Make it more compact for display
-                        stats_display = stats_part.replace('AVG: ', '').replace(' | HR: ', ' HR ').replace(' | RBI: ', ' RBI ').replace(' | BB: ', ' BB ').replace(' | SO: ', ' SO ')
+                    recent_stats = get_player_last_5_games(name, team_id)
+                    if recent_stats and isinstance(recent_stats, dict):
+                        # Format the stats from the new function
+                        avg = recent_stats.get('avg', 0)
+                        hits = recent_stats.get('hits', 0)
+                        rbi = recent_stats.get('rbi', 0)
+                        games = recent_stats.get('games', 0)
+                        
+                        if games > 0:
+                            stats_display = f"AVG: {avg:.3f} H: {hits} RBI: {rbi}"
+                        else:
+                            stats_display = "No recent data"
                     else:
                         stats_display = "No recent data"
                         print(f"⚠️ No stats for {name}")
@@ -132,126 +160,66 @@ class MLBAPIClient:
     def are_lineups_official(self, boxscore):
         return self.lineup_validator.are_lineups_official(boxscore)
     
-    def get_last_15_games(self, player_name):
-        """
-        Get the last 15 games for a specific player using MLB Stats API
+    def extract_pitcher_data(self, boxscore, side, team_id=119):
+        """Extract starting pitcher data with stats for a specific side (home/away)"""
+        pitchers = boxscore[side].get('pitchers', [])
+        players = boxscore[side].get('players', {})
         
-        Args:
-            player_name (str): Full name of the player (e.g., 'Aaron Judge')
-            
-        Returns:
-            list: List of dictionaries containing game stats for the player
-        """
+        # Only get the starting pitcher (first pitcher in the list)
+        if not pitchers:
+            return []
+        
+        pitcher_id = pitchers[0]  # Get only the first pitcher (starting pitcher)
+        player = players.get(f"ID{pitcher_id}", {})
+        name = player.get('person', {}).get('fullName', 'Unknown')
+        position = player.get('position', {}).get('abbreviation', '')
+        
+        # Get pitcher stats
         try:
-            # Get player ID and team ID
-            player_lookup = statsapi.lookup_player(player_name)
-            if not player_lookup:
-                return f"Player '{player_name}' not found."
-            
-            player_data = player_lookup[0]
-            player_id = player_data['id']
-            team_id = player_data.get('currentTeam', {}).get('id', None)
-
-            if not team_id:
-                # Try to get team from detailed player info
-                player_info = statsapi.get("person", {"personId": player_id})['people'][0]
-                team_id = player_info.get('currentTeam', {}).get('id', None)
+            recent_stats = get_pitcher_last_3_games(name, team_id)
+            if recent_stats and isinstance(recent_stats, dict):
+                era = recent_stats.get('era', 0)
+                whip = recent_stats.get('whip', 0)
+                k = recent_stats.get('k', 0)
+                ip = recent_stats.get('ip', 0)
+                games = recent_stats.get('games', 0)
                 
-                if not team_id:
-                    return f"No team information found for {player_name}."
-
-            # Get recent games (use a smaller date range for faster performance)
-            from datetime import datetime, timedelta
-            end_date = datetime.now().strftime('%Y-%m-%d')
-            start_date = (datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d')  # Reduced to 60 days for speed
-            
-            recent_schedule = statsapi.schedule(team=team_id, start_date=start_date, end_date=end_date)
-            
-            if not recent_schedule:
-                return f"No recent games found for {player_name}'s team in the last 60 days."
-
-            # Sort games by date to ensure we get the most recent ones
-            recent_schedule.sort(key=lambda x: x.get('game_date', ''), reverse=True)
-            
-            player_game_stats = []
-
-            for game in recent_schedule:  # Now going forward through sorted games
-                try:
-                    game_id = game.get('game_id')  # Use 'game_id' instead of 'gamePk'
-                    if not game_id:
-                        continue
-                        
-                    boxscore = statsapi.boxscore_data(game_id)
-
-                    # Check if player played for home or away
-                    for side in ['home', 'away']:
-                        players = boxscore[side]['players']
-                        for pid, pdata in players.items():
-                            if pdata['person']['id'] == player_id:
-                                # Grab stats
-                                stats = pdata.get('stats', {}).get('batting', {})
-                                at_bats = stats.get('atBats', 0)
-                                
-                                # Only include games where the player actually had at-bats (like the official website)
-                                if at_bats > 0:
-                                    date = game.get('game_date', 'Unknown')
-                                    opponent = game.get('away_name', 'Unknown') if side == 'home' else game.get('home_name', 'Unknown')
-                                    player_game_stats.append({
-                                        'date': date,
-                                        'opponent': opponent,
-                                        'AB': at_bats,
-                                        'H': stats.get('hits', 0),
-                                        'HR': stats.get('homeRuns', 0),
-                                        'RBI': stats.get('rbi', 0),
-                                        'BB': stats.get('baseOnBalls', 0),
-                                        'SO': stats.get('strikeOuts', 0)
-                                    })
-                                break  # Found him
-                        
-                except Exception as e:
-                    print(f"Error processing game: {e}")
-                    continue
-            
-            # Sort all found games by date (most recent first) and take the first 15
-            player_game_stats.sort(key=lambda x: x['date'], reverse=True)
-            player_game_stats = player_game_stats[:15]
-
-            return player_game_stats
-            
+                if games > 0:
+                    stats_display = f"ERA: {era:.2f} WHIP: {whip:.2f} K: {k} IP: {ip}"
+                else:
+                    stats_display = "No recent data"
+            else:
+                stats_display = "No recent data"
         except Exception as e:
-            return f"Error getting game history for {player_name}: {e}"
+            print(f"❌ Error getting pitcher stats for {name}: {e}")
+            stats_display = "No recent data"
+        
+        return [{
+            'name': name,
+            'position': position,
+            'recent_stats': stats_display
+        }]
     
-    def get_player_15_games_string(self, player_name, games=15):
-        """
-        Get a formatted string summary of player's recent performance
+    def extract_pitcher_data_basic(self, boxscore, side):
+        """Extract basic starting pitcher data without stats (for incomplete lineups)"""
+        pitchers = boxscore[side].get('pitchers', [])
+        players = boxscore[side].get('players', {})
         
-        Args:
-            player_name (str): Full name of the player
-            games (int): Number of recent games to analyze (default 15)
-            
-        Returns:
-            str: Formatted performance summary string
-        """
-        game_stats = self.get_last_15_games(player_name)
+        # Only get the starting pitcher (first pitcher in the list)
+        if not pitchers:
+            return []
         
-        if isinstance(game_stats, str):  # Error message
-            return game_stats
+        pitcher_id = pitchers[0]  # Get only the first pitcher (starting pitcher)
+        player = players.get(f"ID{pitcher_id}", {})
+        name = player.get('person', {}).get('fullName', 'Unknown')
+        position = player.get('position', {}).get('abbreviation', '')
         
-        if not game_stats:
-            return f"No recent games found for {player_name}"
-        
-        # Calculate totals
-        total_ab = sum(game['AB'] for game in game_stats)
-        total_hits = sum(game['H'] for game in game_stats)
-        total_hr = sum(game['HR'] for game in game_stats)
-        total_rbi = sum(game['RBI'] for game in game_stats)
-        
-        # Calculate batting average
-        avg = total_hits / total_ab if total_ab > 0 else 0
-        
-        summary = f"{player_name} - Last {len(game_stats)} games:\n"
-        summary += f"AVG: .{int(avg*1000):03d} | HR: {total_hr} | RBI: {total_rbi}"
-        
-        return summary
+        return [{
+            'name': name,
+            'position': position,
+            'recent_stats': "No recent data"
+        }]
+    
+
         
         

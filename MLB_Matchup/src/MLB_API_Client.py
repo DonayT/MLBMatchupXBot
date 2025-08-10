@@ -11,14 +11,29 @@ class MLBAPIClient:
         self.geolocator = None
         self.lineup_validator = LineupValidator()
 
+    """
+    params: date (str, optional) - Date in YYYY-MM-DD format, defaults to today
+    returns: list - List of games scheduled for the specified date
+    summary: Get MLB schedule for a specific date
+    """
     def get_schedule(self, date=None):
         if date is None: 
             date = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
         return statsapi.schedule(start_date = date, end_date = date)
 
+    """
+    params: game_id (int) - MLB game ID
+    returns: dict - Boxscore data for the specified game
+    summary: Retrieve boxscore data for a specific MLB game
+    """
     def get_boxscore(self, game_id):
         return statsapi.boxscore_data(game_id)
 
+    """
+    params: venue_id (int) - MLB venue ID
+    returns: dict or None - Venue information or None if not found
+    summary: Get venue data for a specific MLB venue
+    """
     def get_venue_data(self, venue_id):
         if not venue_id:
             return None
@@ -30,24 +45,25 @@ class MLBAPIClient:
             print(f"Error fetching venue data for venue_id {venue_id}: {e}")
             return None
 
+    """
+    params: None
+    returns: dict - Dictionary mapping team names to their W-L records
+    summary: Get current team records from MLB standings
+    """
     def get_team_records(self):
-        """Get current team records as a dictionary"""
         try:
             standings = statsapi.standings()
             team_records = {}
             
-            # Parse the standings string to extract team names and W-L records
             lines = standings.split('\n')
             
             for line in lines:
-                # Look for lines that contain team names and W-L records
                 match = re.search(r'\s+\d+\s+([A-Za-z\s\.]+)\s+(\d+)\s+(\d+)', line)
                 if match:
                     team_name = match.group(1).strip()
                     wins = int(match.group(2))
                     losses = int(match.group(3))
                     
-                    # Skip empty team names (parsing errors)
                     if team_name and len(team_name) > 2:
                         team_records[team_name] = {
                             'wins': wins,
@@ -61,11 +77,20 @@ class MLBAPIClient:
             print(f"Error getting team records: {e}")
             return {}
 
+    """
+    params: team_name (str) - Name of the team
+    returns: dict - Team record with wins, losses, and formatted record string
+    summary: Get record for a specific team
+    """
     def get_team_record(self, team_name):
-        """Get record for a specific team"""
         team_records = self.get_team_records()
         return team_records.get(team_name, {'wins': 0, 'losses': 0, 'record': '0-0'})
 
+    """
+    params: game_datetime (str) - ISO format datetime string, game_date (str) - Fallback date
+    returns: tuple - (formatted_date, formatted_time) in MM/DD/YYYY and I:M AM/PM ET format
+    summary: Format game datetime to Eastern Time and readable format
+    """
     def format_game_datetime(self, game_datetime, game_date):
         if game_datetime:
             try:
@@ -80,6 +105,11 @@ class MLBAPIClient:
         
         return game_date if game_date else 'TBD', 'TBD'
     
+    """
+    params: venue_name (str) - Name of the venue
+    returns: tuple - (city, state) extracted from venue name
+    summary: Extract city and state information from venue name
+    """
     def get_venue_location(self, venue_name):
         if venue_name == 'Unknown Venue':
             return 'Unknown City', 'Unknown State'
@@ -95,8 +125,12 @@ class MLBAPIClient:
             print(f"Error getting city/state for {venue_name}: {e}")
             return 'Unknown City', 'Unknown State'
     
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away'
+    returns: list - List of player dictionaries with basic lineup information
+    summary: Extract basic lineup data without player stats for incomplete lineups
+    """
     def extract_lineup_data_basic(self, boxscore, side):
-        """Extract basic lineup data without fetching player stats (for incomplete lineups)"""
         batting_order = boxscore[side].get('battingOrder', [])
         players = boxscore[side].get('players', {})
         
@@ -111,11 +145,16 @@ class MLBAPIClient:
                     'order': idx,
                     'name': name,
                     'position': position,
-                    'recent_stats': "No recent data"  # Placeholder for incomplete lineups
+                    'recent_stats': "No recent data"
                 })
         
         return lineup
     
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away', team_id (int) - Team ID
+    returns: list - List containing player lineup data with recent stats
+    summary: Extract complete lineup data with recent performance statistics
+    """
     def extract_lineup_data(self, boxscore, side, team_id=119):
         batting_order = boxscore[side].get('battingOrder', [])
         players = boxscore[side].get('players', {})
@@ -127,18 +166,18 @@ class MLBAPIClient:
                 name = player.get('person', {}).get('fullName', 'Unknown')
                 position = player.get('position', {}).get('abbreviation', '')
                 
-                # Get player stats with better error handling
                 try:
                     recent_stats = get_player_last_5_games(name, team_id)
                     if recent_stats and isinstance(recent_stats, dict):
-                        # Format the stats from the new function
                         avg = recent_stats.get('avg', 0)
+                        ops = recent_stats.get('ops', 0)
                         hits = recent_stats.get('hits', 0)
                         rbi = recent_stats.get('rbi', 0)
+                        so = recent_stats.get('so', 0)
                         games = recent_stats.get('games', 0)
                         
                         if games > 0:
-                            stats_display = f"AVG: {avg:.3f} H: {hits} RBI: {rbi}"
+                            stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
                         else:
                             stats_display = "No recent data"
                     else:
@@ -157,24 +196,31 @@ class MLBAPIClient:
         
         return lineup
     
+    """
+    params: boxscore (dict) - Game boxscore data
+    returns: bool - True if lineups are official, False otherwise
+    summary: Check if lineups for a game are official
+    """
     def are_lineups_official(self, boxscore):
         return self.lineup_validator.are_lineups_official(boxscore)
     
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away', team_id (int) - Team ID
+    returns: list - List containing starting pitcher data with recent stats
+    summary: Extract starting pitcher data with recent performance statistics
+    """
     def extract_pitcher_data(self, boxscore, side, team_id=119):
-        """Extract starting pitcher data with stats for a specific side (home/away)"""
         pitchers = boxscore[side].get('pitchers', [])
         players = boxscore[side].get('players', {})
         
-        # Only get the starting pitcher (first pitcher in the list)
         if not pitchers:
             return []
         
-        pitcher_id = pitchers[0]  # Get only the first pitcher (starting pitcher)
+        pitcher_id = pitchers[0]
         player = players.get(f"ID{pitcher_id}", {})
         name = player.get('person', {}).get('fullName', 'Unknown')
         position = player.get('position', {}).get('abbreviation', '')
         
-        # Get pitcher stats
         try:
             recent_stats = get_pitcher_last_3_games(name, team_id)
             if recent_stats and isinstance(recent_stats, dict):
@@ -200,16 +246,19 @@ class MLBAPIClient:
             'recent_stats': stats_display
         }]
     
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away'
+    returns: list - List containing basic starting pitcher data without stats
+    summary: Extract basic starting pitcher data for incomplete lineups
+    """
     def extract_pitcher_data_basic(self, boxscore, side):
-        """Extract basic starting pitcher data without stats (for incomplete lineups)"""
         pitchers = boxscore[side].get('pitchers', [])
         players = boxscore[side].get('players', {})
         
-        # Only get the starting pitcher (first pitcher in the list)
         if not pitchers:
             return []
         
-        pitcher_id = pitchers[0]  # Get only the first pitcher (starting pitcher)
+        pitcher_id = pitchers[0]
         player = players.get(f"ID{pitcher_id}", {})
         name = player.get('person', {}).get('fullName', 'Unknown')
         position = player.get('position', {}).get('abbreviation', '')

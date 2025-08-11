@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>MLB Lineup Bot</title>
+        <style>
+
+            @font-face {
+                font-family: 'Anton';
+                src: url('../config/anton.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+
+            @font-face {
+                font-family: 'WorkSans-Regular';
+                src: url('../config/WorkSans-Regular.ttf') format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+
+            @font-face {
+                font-family: 'WorkSans-Bold';
+                src: url('../config/WorkSans-Bold.ttf') format('truetype');
+                font-weight: bold;
+                font-style: normal;
+            }
+
+            .card {
+                width: 1200px;
+                height: 1400px;
+                border: 2px solid #000000;
+                padding: 20px;
+                box-sizing: border-box;
+                background: linear-gradient(90deg, #d35151, #7d6dd6);
+            }
+
+            .top-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                position: relative;
+                height: 18%;
+            }
+
+            .team {
+                position: absolute;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .team:first-child {
+                left: 20%;
+                transform: translateX(-50%);
+            }
+
+            .team:last-child {
+                right: 20%;
+                transform: translateX(50%);
+            }
+
+            .team-abbreviation {
+                font-family: 'Anton', sans-serif;
+                font-weight: 900;
+                font-size: 250px;
+                line-height: 1;
+                letter-spacing: 3px;
+                user-select: none;
+            }
+
+             /* Team colors and outlines */
+            .away-team-colors {
+                color: #ffffff;
+                -webkit-text-stroke: 3px #000000;
+                text-stroke: 3px #000000;
+            }
+
+            .home-team-colors {
+                color: #ffffff;
+                -webkit-text-stroke: 3px #000000;
+                text-stroke: 3px #000000;
+            }
+
+            .team-record {
+                font-weight: bold;
+                font-size: 40px;
+                margin-top: -10px;
+            }
+
+            .away-team-record {
+                color: #000000;
+            }
+
+            .home-team-record {
+                color: #000000;
+            }
+
+            .vs {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                font-weight: 900;
+                font-size: 100px;
+                margin: 0;
+                user-select: none;
+                z-index: 10;
+            }
+
+            .game-info {
+                font-size: 14px;
+                line-height: 1.3;
+                color: black;
+                width: 100%;
+                text-align: center;
+                margin-top: -10px;
+            }
+
+            .pitcher-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                position: relative;
+                height: 15%;
+            }
+
+            .away-pitcher {
+                position: absolute;
+                left: 24%;
+                transform: translateX(-50%);
+            }
+
+            .home-pitcher {
+                position: absolute;
+                right: 24%;
+                transform: translateX(50%);
+            }
+
+            .player-box {
+                border: 6px solid #000000;
+                padding: 15px;
+                margin-top: 20px;
+                background-color: #ffffff;
+                position: relative;
+                width: 525px;
+                text-align: center;
+            }
+
+            .pitcher-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+
+            .position {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 50px;
+                font-weight: bold;
+                color: #000000;
+            }
+
+            .player-name {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 40px;
+                color: #000000;
+                flex: 1;
+                text-align: center;
+            }
+
+            .symbol {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 50px;
+                font-weight: bold;
+                color: #000000;
+            }
+
+            .pitcher-stats {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 24px;
+                color: #666666
+            }
+
+            .lineup-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                width: 100%;
+                padding: 20px;
+                gap: 4px;
+            }
+
+            .away-lineup, .home-lineup {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .lineup-box {
+                border: 6px solid #000000;
+                padding: 0px;
+                margin-top: 5px;
+                background-color: #ffffff;
+                position: relative;
+                width: 525px;
+                text-align: center;
+            }
+
+            .lineup-header-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 6px;
+            }
+
+            .player-stats {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 24px;
+                color: #666666;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <div class="card">
+            <div class="top-section">
+                <div class="team">
+                    <div class="team-abbreviation away-team-colors">NYM</div>
+                    <div class="team-record away-team-record">10-10</div>
+                </div>
+
+
+                <div class="vs">vs</div>
+
+                <div class="team">
+                    <div class="team-abbreviation home-team-colors">NYM</div>
+                    <div class="team-record home-team-record">10-10</div>
+                </div>
+            </div>
+
+            <div class="pitcher-section">
+                <div class="away-pitcher">
+                    <div class="player-box">
+                        <div class="pitcher-header">
+                            <span class="position">SP</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="pitcher-stats">Stats</div>
+                    </div>
+                </div>
+                
+                <div class="home-pitcher">
+                    <div class="player-box">
+                        <div class="pitcher-header">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">SP</span>
+                        </div>
+                        <div class="pitcher-stats">Stats</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lineup-section">
+                <div class="away-lineup">
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">1B</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">2B</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">3B</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">SS</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">LF</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">CF</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">RF</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">DH</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">C</span>
+                            <span class="player-name">First Last</span>
+                            <span class="symbol">🔥</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                </div>
+                
+                <div class="home-lineup">
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">1B</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">2B</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">3B</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">SS</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">LF</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">CF</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">RF</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">DH</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="symbol">🔥</span>
+                            <span class="player-name">First Last</span>
+                            <span class="position">C</span>
+                        </div>
+                        <div class="player-stats">Stats</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </body>
+</html>

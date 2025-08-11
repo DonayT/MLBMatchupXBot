@@ -32,7 +32,7 @@
                 border: 2px solid #000000;
                 padding: 20px;
                 box-sizing: border-box;
-                background: linear-gradient(90deg, #00385dcc, #002D72cc);
+                /* background: linear-gradient(90deg, #00385dcc, #002D72cc); */
             }
 
             .top-section {
@@ -111,9 +111,10 @@
             }
 
             .game-info {
+                font-family: 'WorkSans-Bold', sans-serif;
                 font-size: 30px;
                 line-height: 1.3;
-                color: black;
+                color: rgb(0, 0, 0);
                 width: 100%;
                 text-align: center;
                 margin-top: 100px;
@@ -140,11 +141,11 @@
                 transform: translateX(50%);
             }
 
-            .player-box {
+            .pitcher-box {
                 border: 6px solid #000000;
                 padding: 15px;
                 margin-top: 20px;
-                background-color: #ffffff;
+                background-color: #c0c0c0;
                 position: relative;
                 width: 525px;
                 text-align: center;
@@ -161,9 +162,9 @@
 
             .position {
                 font-family: 'WorkSans-Bold', sans-serif;
-                font-size: 40px;
+                font-size: 30px;
                 font-weight: bold;
-                color: #ffffff;
+                color: #000000;
                 text-orientation: mixed;
                 height: 100%;
                 display: flex;
@@ -177,7 +178,7 @@
 
             .position-pitcher {
                 font-family: 'WorkSans-Bold', sans-serif;
-                font-size: 40px;
+                font-size: 30px;
                 font-weight: bold;
                 color: #000000;
                 text-orientation: mixed;
@@ -192,17 +193,19 @@
             }
 
             .pitcher-name {
-                font-family: 'WorkSans-Regular', sans-serif;
-                font-size: 40px;
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 35px;
+                font-weight: bold;
                 color: #000000;
                 position: absolute;
                 top: 10px;
             }
 
             .player-name {
-                font-family: 'WorkSans-Regular', sans-serif;
-                font-size: 40px;
-                color: #ffffff;
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-weight: bold;
+                font-size: 38px;
+                color: #000000;
                 position: absolute;
                 top: 10px;
             }
@@ -218,12 +221,13 @@
 
             .pitcher-stats {
                 font-family: 'WorkSans-Regular', sans-serif;
-                font-size: 24px;
+                font-style: italic;
+                font-size: 18px;
                 color: #000000;
                 margin-top: 0px;
                 padding-top: 0px;
                 position: absolute;
-                top: 60px;
+                top: 65px;
             }
 
             .lineup-section {
@@ -231,8 +235,8 @@
                 justify-content: space-between;
                 align-items: flex-start;
                 width: 100%;
-                padding: 20px;
-                gap: 4px;
+                padding: 0px;
+                gap: 10px;
             }
 
             .away-lineup, .home-lineup {
@@ -248,7 +252,7 @@
                 margin-top: 10px;
                 background-color: #ffffff00;
                 position: relative;
-                width: 525px;
+                width: 570px;
                 text-align: center;
             }
 
@@ -263,52 +267,53 @@
 
             .player-stats {
                 font-family: 'WorkSans-Regular', sans-serif;
-                font-size: 24px;
-                color: #ffffff;
+                font-style: italic;
+                font-size: 18px;
+                color: #2e2d2d;
                 margin-top: 0px;
                 padding-top: 0px;
                 position: absolute;
-                top: 50px;
+                top: 55px;
             }
 
             .away-lineup .player-stats {
                 text-align: left;
-                left: 125px;
+                left: 86px;
             }
 
             .home-lineup .player-stats {
                 text-align: right;
-                right: 125px;
+                right: 86px;
             }
 
             .away-pitcher .pitcher-stats {
                 text-align: left;
-                left: 135px;
+                left: 95px;
             }
 
             .home-pitcher .pitcher-stats {
                 text-align: right;
-                right: 135px;
+                right: 95px;
             }
 
             .away-lineup .player-name {
                 text-align: left;
-                left: 125px;
+                left: 85px;
             }
 
             .home-lineup .player-name {
                 text-align: right;
-                right: 120px;
+                right: 80px;
             }
 
             .away-pitcher .pitcher-name {
                 text-align: left;
-                left: 120px;
+                left: 80px;
             }
 
             .home-pitcher .pitcher-name {
                 text-align: right;
-                right: 120px;
+                right: 80px;
             }
 
             .away-lineup .position {
@@ -370,24 +375,24 @@
 
             <div class="pitcher-section">
                 <div class="away-pitcher">
-                    <div class="player-box">
+                    <div class="pitcher-box">
                         <div class="pitcher-header">
                             <span class="position-pitcher">SP</span>
-                            <span class="pitcher-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <span class="pitcher-name">Paul Blackburn</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="pitcher-stats">Stats</div>
+                        <div class="pitcher-stats">ERA: 2.56 | IP: 18 | SO: 46</div>
                     </div>
                 </div>
                 
                 <div class="home-pitcher">
-                    <div class="player-box">
+                    <div class="pitcher-box">
                         <div class="pitcher-header">
-                            <span class="symbol">🧊</span>
-                            <span class="pitcher-name">First Last</span>
+                            <!-- <span class="symbol">🧊</span> -->
+                            <span class="pitcher-name">Yoshinobu Yamamoto</span>
                             <span class="position-pitcher">SP</span>
                         </div>
-                        <div class="pitcher-stats">Stats</div>
+                        <div class="pitcher-stats">ERA: 2.56 | IP: 18 | SO: 46</div>
                     </div>
                 </div>
             </div>
@@ -397,149 +402,149 @@
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">1B</span>
-                            <span class="player-name">First Last</span>
-                            <span class="symbol">🧊</span>
+                            <span class="player-name">Pete Crow-Armstrong</span>
+                            <!-- <span class="symbol">🧊</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">2B</span>
-                            <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <span class="player-name">Luis Robert Jr.</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">3B</span>
-                            <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <span class="player-name">Luke Keaschall</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">SS</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🧊</span>
+                            <!-- <span class="symbol">🧊</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">LF</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">CF</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">RF</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🧊</span>
+                            <!-- <span class="symbol">🧊</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">DH</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">C</span>
                             <span class="player-name">First Last</span>
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                 </div>
                 
                 <div class="home-lineup">
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name">Pete Crow-Armstrong</span>
                             <span class="position">1B</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                             <span class="player-name">First Last</span>
                             <span class="position">2B</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name">Wilson Contreras</span>
                             <span class="position">3B</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name">Tyler Soderstrom</span>
                             <span class="position">SS</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🧊</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🧊</span> -->
+                            <span class="player-name">Elly De La Cruz</span>
                             <span class="position">LF</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name">Hunter Goodman</span>
                             <span class="position">CF</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🧊</span>
+                            <!-- <span class="symbol">🧊</span> -->
                             <span class="player-name">First Last</span>
                             <span class="position">RF</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name">Roman Anthony</span>
                             <span class="position">DH</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                     <div class="lineup-box">
                         <div class="lineup-header-row">
-                            <span class="symbol">🔥</span>
+                            <!-- <span class="symbol">🔥</span> -->
                             <span class="player-name">First Last</span>
                             <span class="position">C</span>
                         </div>
-                        <div class="player-stats">Stats</div>
+                        <div class="player-stats">AVG: .456 | OPS: 1.2456 | H: 7 | HR: 3 | SO: 2 | RBI: 10</div>
                     </div>
                 </div>
             </div>

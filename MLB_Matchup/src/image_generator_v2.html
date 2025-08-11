@@ -32,7 +32,7 @@
                 border: 2px solid #000000;
                 padding: 20px;
                 box-sizing: border-box;
-                background: linear-gradient(90deg, #d35151, #7d6dd6);
+                background: linear-gradient(90deg, #00385dcc, #002D72cc);
             }
 
             .top-section {
@@ -41,7 +41,7 @@
                 align-items: center;
                 width: 100%;
                 position: relative;
-                height: 18%;
+                height: 20%;
             }
 
             .team {
@@ -72,14 +72,14 @@
 
              /* Team colors and outlines */
             .away-team-colors {
-                color: #ffffff;
-                -webkit-text-stroke: 3px #000000;
+                color: #00385D;
+                -webkit-text-stroke: 3px #e50022;
                 text-stroke: 3px #000000;
             }
 
             .home-team-colors {
-                color: #ffffff;
-                -webkit-text-stroke: 3px #000000;
+                color: #002D72;
+                -webkit-text-stroke: 3px #FF5910;
                 text-stroke: 3px #000000;
             }
 
@@ -103,19 +103,20 @@
                 top: 50%;
                 transform: translate(-50%, -50%);
                 font-weight: 900;
-                font-size: 100px;
+                font-size: 110px;
                 margin: 0;
+                margin-top: -60px;
                 user-select: none;
                 z-index: 10;
             }
 
             .game-info {
-                font-size: 14px;
+                font-size: 30px;
                 line-height: 1.3;
                 color: black;
                 width: 100%;
                 text-align: center;
-                margin-top: -10px;
+                margin-top: 100px;
             }
 
             .pitcher-section {
@@ -124,7 +125,7 @@
                 align-items: center;
                 width: 100%;
                 position: relative;
-                height: 15%;
+                height: 10%;
             }
 
             .away-pitcher {
@@ -152,23 +153,58 @@
             .pitcher-header {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                margin-bottom: 8px;
+                align-items: flex-start;
+                margin-bottom: 0px;
+                position: relative;
+                height: 80px;
             }
 
             .position {
                 font-family: 'WorkSans-Bold', sans-serif;
-                font-size: 50px;
+                font-size: 70px;
+                font-weight: bold;
+                color: #ffffff;
+                text-orientation: mixed;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80px;
+                margin: 0 10px;
+                position: absolute;
+                top: 10px;
+            }
+
+            .position-pitcher {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 70px;
                 font-weight: bold;
                 color: #000000;
+                text-orientation: mixed;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80px;
+                margin: 0 10px;
+                position: absolute;
+                top: 10px;
+            }
+
+            .pitcher-name {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 40px;
+                color: #000000;
+                position: absolute;
+                top: 10px;
             }
 
             .player-name {
                 font-family: 'WorkSans-Regular', sans-serif;
                 font-size: 40px;
-                color: #000000;
-                flex: 1;
-                text-align: center;
+                color: #ffffff;
+                position: absolute;
+                top: 10px;
             }
 
             .symbol {
@@ -176,12 +212,18 @@
                 font-size: 50px;
                 font-weight: bold;
                 color: #000000;
+                position: absolute;
+                top: 10px;
             }
 
             .pitcher-stats {
                 font-family: 'WorkSans-Regular', sans-serif;
                 font-size: 24px;
-                color: #666666
+                color: #000000;
+                margin-top: 0px;
+                padding-top: 0px;
+                position: absolute;
+                top: 60px;
             }
 
             .lineup-section {
@@ -201,10 +243,10 @@
             }
 
             .lineup-box {
-                border: 6px solid #000000;
-                padding: 0px;
-                margin-top: 5px;
-                background-color: #ffffff;
+                border: none;
+                padding: 2px;
+                margin-top: 10px;
+                background-color: #ffffff00;
                 position: relative;
                 width: 525px;
                 text-align: center;
@@ -213,14 +255,92 @@
             .lineup-header-row {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                margin-bottom: 6px;
+                align-items: flex-start;
+                margin-bottom: 0px;
+                position: relative;
+                height: 80px;
             }
 
             .player-stats {
                 font-family: 'WorkSans-Regular', sans-serif;
                 font-size: 24px;
-                color: #666666;
+                color: #ffffff;
+                margin-top: 0px;
+                padding-top: 0px;
+                position: absolute;
+                top: 50px;
+            }
+
+            .away-lineup .player-stats {
+                text-align: left;
+                left: 125px;
+            }
+
+            .home-lineup .player-stats {
+                text-align: right;
+                right: 125px;
+            }
+
+            .away-pitcher .pitcher-stats {
+                text-align: left;
+                left: 135px;
+            }
+
+            .home-pitcher .pitcher-stats {
+                text-align: right;
+                right: 135px;
+            }
+
+            .away-lineup .player-name {
+                text-align: left;
+                left: 125px;
+            }
+
+            .home-lineup .player-name {
+                text-align: right;
+                right: 120px;
+            }
+
+            .away-pitcher .pitcher-name {
+                text-align: left;
+                left: 120px;
+            }
+
+            .home-pitcher .pitcher-name {
+                text-align: right;
+                right: 120px;
+            }
+
+            .away-lineup .position {
+                left: 0px;
+            }
+
+            .home-lineup .position {
+                right: 0px;
+            }
+
+            .away-pitcher .position-pitcher {
+                left: 0px;
+            }
+
+            .home-pitcher .position-pitcher {
+                right: 0px;
+            }
+
+            .away-lineup .symbol {
+                right: 0px;
+            }
+
+            .home-lineup .symbol {
+                left: 0px;
+            }
+
+            .away-pitcher .symbol {
+                right: 0px;
+            }
+
+            .home-pitcher .symbol {
+                left: -5px;
             }
 
         </style>
@@ -230,12 +350,17 @@
         <div class="card">
             <div class="top-section">
                 <div class="team">
-                    <div class="team-abbreviation away-team-colors">NYM</div>
+                    <div class="team-abbreviation away-team-colors">CLE</div>
                     <div class="team-record away-team-record">10-10</div>
                 </div>
 
 
                 <div class="vs">vs</div>
+                <div class="game-info">
+                    <div>August 15, 2025</div>
+                    <div>7:10 PM ET</div>
+                    <div>Citi Field</div>
+                </div>
 
                 <div class="team">
                     <div class="team-abbreviation home-team-colors">NYM</div>
@@ -247,8 +372,8 @@
                 <div class="away-pitcher">
                     <div class="player-box">
                         <div class="pitcher-header">
-                            <span class="position">SP</span>
-                            <span class="player-name">First Last</span>
+                            <span class="position-pitcher">SP</span>
+                            <span class="pitcher-name">First Last</span>
                             <span class="symbol">🔥</span>
                         </div>
                         <div class="pitcher-stats">Stats</div>
@@ -259,8 +384,8 @@
                     <div class="player-box">
                         <div class="pitcher-header">
                             <span class="symbol">🔥</span>
-                            <span class="player-name">First Last</span>
-                            <span class="position">SP</span>
+                            <span class="pitcher-name">First Last</span>
+                            <span class="position-pitcher">SP</span>
                         </div>
                         <div class="pitcher-stats">Stats</div>
                     </div>

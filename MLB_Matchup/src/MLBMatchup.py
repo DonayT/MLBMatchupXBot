@@ -1,10 +1,11 @@
 from datetime import datetime
 import statsapi
+import os
 
 from game_data_processor import GameDataProcessor
 from game_queue import GameQueue
 from date_organizer import check_date_transition, organize_existing_images
-from twitter_image_generator import create_twitter_image
+from jinja2_image_generator import Jinja2ImageGenerator
 from x_uploader import upload_image_to_twitter
 from get_stats import clear_stats_cache
 
@@ -12,6 +13,7 @@ class MLBMatchup:
     def __init__(self):
         self.game_data_processor = GameDataProcessor()
         self.game_queue = GameQueue()
+        self.jinja2_generator = Jinja2ImageGenerator()
 
     """
     params: None
@@ -54,7 +56,8 @@ class MLBMatchup:
             if game_data['lineups_official']:
                 
                 try:
-                    image_path = create_twitter_image(game_data)
+                    # Create image using the new Jinja2 system
+                    image_path = self.create_lineup_image_with_jinja2(game_data)
                     
                     self.game_queue.mark_processed(game_data['game_id'])
                     print(f"   Game {game_data['game_id']} marked as processed")
@@ -69,3 +72,100 @@ class MLBMatchup:
             print()
     
         return "CONTINUE"
+    
+    def create_lineup_image_with_jinja2(self, game_data):
+        """Create lineup image using the new Jinja2 system"""
+        try:
+            # Prepare the output path in the images folder with date organization
+            images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'images')
+            
+            # Create date folder (YYYY-MM-DD format)
+            game_date = game_data['game_date']
+            if game_date and game_date != 'Unknown':
+                # Convert MM/DD/YYYY to YYYY-MM-DD format
+                try:
+                    from datetime import datetime
+                    parsed_date = datetime.strptime(game_date, '%m/%d/%Y')
+                    date_folder = parsed_date.strftime('%Y-%m-%d')
+                except:
+                    # Fallback to today's date if parsing fails
+                    from datetime import datetime
+                    date_folder = datetime.now().strftime('%Y-%m-%d')
+            else:
+                # Use today's date if no game date available
+                from datetime import datetime
+                date_folder = datetime.now().strftime('%Y-%m-%d')
+            
+            # Create the full path with date folder
+            date_images_dir = os.path.join(images_dir, date_folder)
+            os.makedirs(date_images_dir, exist_ok=True)
+            
+            # Create filename based on game info
+            away_team_clean = game_data['away_team'].replace(' ', '_').replace('.', '')
+            home_team_clean = game_data['home_team'].replace(' ', '_').replace('.', '')
+            game_id = game_data['game_id']
+            
+            output_filename = f"lineup_{away_team_clean}_vs_{home_team_clean}_{game_id}.png"
+            output_path = os.path.join(date_images_dir, output_filename)
+            
+            print(f"   🎨 Creating Jinja2 lineup image...")
+            print(f"   📁 Saving to: images/{date_folder}/")
+            
+            # Debug: Print the structure of the lineup data
+            print(f"   🔍 Debug - Away lineup structure:")
+            if game_data['away_lineup']:
+                print(f"      First player: {game_data['away_lineup'][0]}")
+            print(f"   🔍 Debug - Home lineup structure:")
+            if game_data['home_lineup']:
+                print(f"      First player: {game_data['home_lineup'][0]}")
+            
+            # Format the game data to match what Jinja2ImageGenerator expects
+            # Fix: Map the lineup data correctly with stats field
+            formatted_away_lineup = []
+            for player in game_data['away_lineup']:
+                formatted_away_lineup.append({
+                    'name': player.get('name', 'TBD'),
+                    'position': player.get('position', ''),
+                    'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                })
+            
+            formatted_home_lineup = []
+            for player in game_data['home_lineup']:
+                formatted_home_lineup.append({
+                    'name': player.get('name', 'TBD'),
+                    'position': player.get('position', ''),
+                    'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                })
+            
+            formatted_game_data = {
+                'away_team': game_data['away_team'],
+                'home_team': game_data['home_team'],
+                'game_date': game_data['game_date'],
+                'game_time': game_data['game_time'],
+                'game_location': game_data['venue'],  # Just show stadium name
+                'away_lineup': formatted_away_lineup,
+                'home_lineup': formatted_home_lineup,
+                'away_pitcher': {
+                    'name': game_data['away_pitcher'] if game_data['away_pitcher'] != 'TBD' else 'TBD',
+                    'position': 'P',
+                    'stats': game_data['away_pitchers'][0].get('recent_stats', 'No recent data') if game_data['away_pitchers'] else 'No recent data'
+                },
+                'home_pitcher': {
+                    'name': game_data['home_pitcher'] if game_data['home_pitcher'] != 'TBD' else 'TBD',
+                    'position': 'P',
+                    'stats': game_data['home_pitchers'][0].get('recent_stats', 'No recent data') if game_data['home_pitchers'] else 'No recent data'
+                }
+            }
+            
+            # Use the new Jinja2ImageGenerator to create the image
+            success = self.jinja2_generator.create_lineup_image(formatted_game_data, output_path)
+            
+            if success:
+                print(f"   ✅ Jinja2 lineup image created: {output_filename}")
+                return output_path
+            else:
+                raise Exception("Failed to create image with Jinja2ImageGenerator")
+                
+        except Exception as e:
+            print(f"   ❌ Error in Jinja2 image creation: {e}")
+            raise e

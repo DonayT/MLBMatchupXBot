@@ -255,7 +255,7 @@
                 margin-top: 0px;
                 padding-top: 0px;
                 position: absolute;
-                top: 70px;
+                top: 80px;
             }
 
             .lineup-section {
@@ -264,7 +264,7 @@
                 align-items: flex-start;
                 width: 100%;
                 padding: 0px;
-                gap: 10px;
+                gap: 0px;
             }
 
             .away-lineup, .home-lineup {
@@ -380,9 +380,9 @@
             // Function to adjust font size for long names
             function adjustFontSize(element, maxWidth, baseFontSize) {
                 const text = element.textContent;
-                if (text.length > 15) { // Only adjust for names longer than 15 characters
+                if (text.length > 20) { // Only adjust for names longer than 15 characters
                     const scale = Math.max(0.6, 1 - (text.length - 15) * 0.03);
-                    const newFontSize = Math.max(baseFontSize * scale, 24);
+                    const newFontSize = Math.max(baseFontSize * scale, 32);
                     element.style.fontSize = newFontSize + 'px';
                 }
             }

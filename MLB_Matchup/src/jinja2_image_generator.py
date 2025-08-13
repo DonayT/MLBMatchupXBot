@@ -336,13 +336,13 @@ def create_lineup_image_example():
     
     # Example game data (you would normally get this from MLB API)
     example_game_data = {
-        'away_team': 'Washington Nationals',
+        'away_team': 'Kansas City Royals',
         'home_team': 'New York Mets',
         'game_date': '08/04/2025',
         'game_time': '7:05 PM ET',
         'game_location': 'Yankee Stadium',
         'away_pitcher': {
-            'name': 'Chris Sale',
+            'name': 'Seth Lugo',
             'position': 'P',
             'stats': 'ERA: 3.45 | WHIP: 1.15 | K: 156 | IP: 180.1'
         },

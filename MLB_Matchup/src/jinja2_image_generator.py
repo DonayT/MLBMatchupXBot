@@ -44,6 +44,36 @@ class Jinja2ImageGenerator:
             print(f"Error loading team secondary colors: {e}")
             return {}
     
+    def load_anton_font(self):
+        """Load Anton font base64 data"""
+        try:
+            config_path = os.path.join(self.config_path, 'anton.ttf.base64.txt')
+            with open(config_path, "r") as f:
+                return f.read().strip()
+        except Exception as e:
+            print(f"Error loading Anton font: {e}")
+            return ""
+    
+    def load_worksans_regular_font(self):
+        """Load WorkSans-Regular font base64 data"""
+        try:
+            config_path = os.path.join(self.config_path, 'WorkSans-Regular.ttf.base64.txt')
+            with open(config_path, "r") as f:
+                return f.read().strip()
+        except Exception as e:
+            print(f"Error loading WorkSans-Regular font: {e}")
+            return ""
+    
+    def load_worksans_bold_font(self):
+        """Load WorkSans-Bold font base64 data"""
+        try:
+            config_path = os.path.join(self.config_path, 'WorkSans-Bold.ttf.base64.txt')
+            with open(config_path, "r") as f:
+                return f.read().strip()
+        except Exception as e:
+            print(f"Error loading WorkSans-Bold font: {e}")
+            return ""
+    
     def get_team_abbreviation(self, team_name):
         """Get team abbreviation from full team name"""
         return self.team_abbreviations.get(team_name, team_name[:3].upper())
@@ -83,6 +113,11 @@ class Jinja2ImageGenerator:
     def prepare_template_data(self, game_data):
         """Prepare data structure for Jinja2 template"""
         try:
+            # Load font base64 data
+            anton_font_b64 = self.load_anton_font()
+            worksans_regular_font_b64 = self.load_worksans_regular_font()
+            worksans_bold_font_b64 = self.load_worksans_bold_font()
+            
             # Extract basic game info
             away_team = game_data.get('away_team', 'Unknown')
             home_team = game_data.get('home_team', 'Unknown')
@@ -139,6 +174,9 @@ class Jinja2ImageGenerator:
             
             # Return template data
             return {
+                'anton_font_b64': anton_font_b64,
+                'worksans_regular_font_b64': worksans_regular_font_b64,
+                'worksans_bold_font_b64': worksans_bold_font_b64,
                 'away_team_abbrev': away_abbrev,
                 'home_team_abbrev': home_abbrev,
                 'away_team_record': away_record.get('record', '0-0'),
@@ -238,6 +276,7 @@ class Jinja2ImageGenerator:
                 'home_team': game_info['home_team'],
                 'game_date': game_info['game_date'],
                 'game_time': game_info['game_time'],
+                'game_venue': game_info['game_venue'],
                 'game_location': game_info['game_location'],
                 'away_lineup': away_lineup,
                 'home_lineup': home_lineup,
@@ -297,11 +336,11 @@ def create_lineup_image_example():
     
     # Example game data (you would normally get this from MLB API)
     example_game_data = {
-        'away_team': 'Boston Red Sox',
-        'home_team': 'New York Yankees',
+        'away_team': 'Washington Nationals',
+        'home_team': 'New York Mets',
         'game_date': '08/04/2025',
         'game_time': '7:05 PM ET',
-        'game_location': 'Yankee Stadium, Bronx, NY',
+        'game_location': 'Yankee Stadium',
         'away_pitcher': {
             'name': 'Chris Sale',
             'position': 'P',
@@ -313,15 +352,15 @@ def create_lineup_image_example():
             'stats': 'ERA: 2.95 | WHIP: 1.08 | K: 178 | IP: 185.2'
         },
         'away_lineup': [
-            {'name': 'Jarren Duran', 'position': 'CF', 'stats': 'AVG: .298 | OPS: .812 | H: 89 | HR: 8 | SO: 67 | RBI: 45'},
-            {'name': 'Rafael Devers', 'position': '3B', 'stats': 'AVG: .275 | OPS: .890 | H: 102 | HR: 25 | SO: 89 | RBI: 78'},
+            {'name': 'Pete Crow-Amrstrong', 'position': 'CF', 'stats': 'AVG: .298 | OPS: .812 | H: 89 | HR: 8 | SO: 67 | RBI: 45'},
+            {'name': 'Christian Encarnacion-Strand', 'position': '3B', 'stats': 'AVG: .275 | OPS: .890 | H: 102 | HR: 25 | SO: 89 | RBI: 78'},
             {'name': 'Triston Casas', 'position': '1B', 'stats': 'AVG: .263 | OPS: .856 | H: 76 | HR: 18 | SO: 82 | RBI: 52'},
             {'name': 'Masataka Yoshida', 'position': 'LF', 'stats': 'AVG: .289 | OPS: .783 | H: 95 | HR: 12 | SO: 58 | RBI: 61'},
             {'name': 'Connor Wong', 'position': 'C', 'stats': 'AVG: .245 | OPS: .712 | H: 67 | HR: 9 | SO: 71 | RBI: 38'},
             {'name': 'Pablo Reyes', 'position': '2B', 'stats': 'AVG: .271 | OPS: .734 | H: 58 | HR: 6 | SO: 45 | RBI: 32'},
             {'name': 'Ceddanne Rafaela', 'position': 'SS', 'stats': 'AVG: .234 | OPS: .678 | H: 43 | HR: 5 | SO: 52 | RBI: 28'},
             {'name': 'Wilyer Abreu', 'position': 'RF', 'stats': 'AVG: .256 | OPS: .745 | H: 51 | HR: 7 | SO: 48 | RBI: 35'},
-            {'name': 'Chris Sale', 'position': 'P', 'stats': 'ERA: 3.45 | WHIP: 1.15 | K: 156 | IP: 180.1'}
+            {'name': 'Wilyer Abreu', 'position': 'RF', 'stats': 'AVG: .256 | OPS: .745 | H: 51 | HR: 7 | SO: 48 | RBI: 35'}
         ],
         'home_lineup': [
             {'name': 'DJ LeMahieu', 'position': '3B', 'stats': 'AVG: .267 | OPS: .745 | H: 78 | HR: 12 | SO: 62 | RBI: 48'},

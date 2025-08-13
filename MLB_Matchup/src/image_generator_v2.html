@@ -6,21 +6,21 @@
         <style>
             @font-face {
                 font-family: 'Anton';
-                src: url('../config/anton.ttf') format('truetype');
+                src: url(data:font/truetype;base64,{{ anton_font_b64 }}) format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
 
             @font-face {
                 font-family: 'WorkSans-Regular';
-                src: url('../config/WorkSans-Regular.ttf') format('truetype');
+                src: url(data:font/truetype;base64,{{ worksans_regular_font_b64 }}) format('truetype');
                 font-weight: normal;
                 font-style: normal;
             }
 
             @font-face {
                 font-family: 'WorkSans-Bold';
-                src: url('../config/WorkSans-Bold.ttf') format('truetype');
+                src: url(data:font/truetype;base64,{{ worksans_bold_font_b64 }}) format('truetype');
                 font-weight: bold;
                 font-style: normal;
             }
@@ -36,8 +36,7 @@
             .card {
                 width: 1200px;
                 height: 1400px;
-                border: 2px solid #000000;
-                padding: 20px;
+                padding: 20px 30px 20px 20px; /* top right bottom left */
                 box-sizing: border-box;
                 /* background: linear-gradient(90deg, #00385dcc, #002D72cc); */
             }
@@ -71,25 +70,26 @@
             }
 
             .team-abbreviation {
-                font-family: 'Anton', sans-serif;
+                font-family: 'Anton', 'Impact', 'Arial Black', sans-serif;
                 font-weight: 900;
                 font-size: 250px;
                 line-height: 1;
-                letter-spacing: 3px;
+                letter-spacing: -5px;
+                margin-top: 40px;
                 user-select: none;
             }
 
              /* Team colors and outlines */
             .away-team-colors {
                 color: var(--away-primary-color);
-                -webkit-text-stroke: 3px var(--away-secondary-color);
-                text-stroke: 3px var(--away-secondary-color);
+                -webkit-text-stroke: 4px var(--away-secondary-color);
+                /* text-stroke: 3px var(--away-secondary-color); */
             }
 
             .home-team-colors {
                 color: var(--home-primary-color);
-                -webkit-text-stroke: 3px var(--home-secondary-color);
-                text-stroke: 3px var(--home-secondary-color);
+                -webkit-text-stroke: 4px var(--home-secondary-color);
+                /* text-stroke: 3px var(--home-secondary-color); */
             }
 
             .team-record {
@@ -107,14 +107,15 @@
             }
 
             .vs {
+                font-family: 'WorkSans-Bold', sans-serif;
                 position: absolute;
                 left: 50%;
-                top: 50%;
+                top: 30%;
                 transform: translate(-50%, -50%);
                 font-weight: 900;
                 font-size: 110px;
                 margin: 0;
-                margin-top: -60px;
+                margin-top: 10px;
                 user-select: none;
                 z-index: 10;
             }
@@ -126,7 +127,7 @@
                 color: rgb(0, 0, 0);
                 width: 100%;
                 text-align: center;
-                margin-top: 100px;
+                margin-top: 40px;
             }
 
             .pitcher-section {
@@ -203,20 +204,38 @@
 
             .pitcher-name {
                 font-family: 'WorkSans-Bold', sans-serif;
-                font-size: 35px;
+                font-size: 48px;
                 font-weight: bold;
                 color: #000000;
                 position: absolute;
                 top: 10px;
+                
+                /* Dynamic font sizing for long names */
+                white-space: nowrap;
+                overflow: visible;
+                max-width: 500px;
+                
+                /* Use a more reliable approach for font scaling */
+                font-size: 44px;
+                transform-origin: left center;
             }
 
             .player-name {
                 font-family: 'WorkSans-Bold', sans-serif;
                 font-weight: bold;
-                font-size: 38px;
+                font-size: 48px;
                 color: #000000;
                 position: absolute;
                 top: 10px;
+                
+                /* Dynamic font sizing for long names */
+                white-space: nowrap;
+                overflow: visible;
+                max-width: 500px;
+                
+                /* Use a more reliable approach for font scaling */
+                font-size: 44px;
+                transform-origin: left center;
             }
 
             .symbol {
@@ -236,7 +255,7 @@
                 margin-top: 0px;
                 padding-top: 0px;
                 position: absolute;
-                top: 65px;
+                top: 70px;
             }
 
             .lineup-section {
@@ -282,7 +301,7 @@
                 margin-top: 0px;
                 padding-top: 0px;
                 position: absolute;
-                top: 55px;
+                top: 65px;
             }
 
             .away-lineup .player-stats {
@@ -357,6 +376,30 @@
                 left: -5px;
             }
         </style>
+        <script>
+            // Function to adjust font size for long names
+            function adjustFontSize(element, maxWidth, baseFontSize) {
+                const text = element.textContent;
+                if (text.length > 15) { // Only adjust for names longer than 15 characters
+                    const scale = Math.max(0.6, 1 - (text.length - 15) * 0.03);
+                    const newFontSize = Math.max(baseFontSize * scale, 24);
+                    element.style.fontSize = newFontSize + 'px';
+                }
+            }
+            
+            // Apply font size adjustments when page loads
+            window.addEventListener('load', function() {
+                // Adjust pitcher names
+                document.querySelectorAll('.pitcher-name').forEach(function(element) {
+                    adjustFontSize(element, 500, 44);
+                });
+                
+                // Adjust player names
+                document.querySelectorAll('.player-name').forEach(function(element) {
+                    adjustFontSize(element, 500, 44);
+                });
+            });
+        </script>
     </head>
     <body>
         <div class="card">
@@ -367,11 +410,14 @@
                 </div>
 
                 <div class="vs">vs</div>
+                <!-- Temporarily commented out game info
                 <div class="game-info">
                     <div>{{ game_date }}</div>
                     <div>{{ game_time }}</div>
+                    <div>{{ game_venue }}</div>
                     <div>{{ game_location }}</div>
                 </div>
+                -->
 
                 <div class="team">
                     <div class="team-abbreviation home-team-colors">{{ home_team_abbrev }}</div>

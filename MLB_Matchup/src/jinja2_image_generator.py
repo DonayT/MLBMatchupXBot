@@ -336,8 +336,8 @@ def create_lineup_image_example():
     
     # Example game data (you would normally get this from MLB API)
     example_game_data = {
-        'away_team': 'Kansas City Royals',
-        'home_team': 'New York Mets',
+        'away_team': 'Pittsburgh Pirates',
+        'home_team': 'Cleveland Guardians',
         'game_date': '08/04/2025',
         'game_time': '7:05 PM ET',
         'game_location': 'Yankee Stadium',

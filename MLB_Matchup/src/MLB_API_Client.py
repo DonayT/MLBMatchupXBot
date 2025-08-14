@@ -167,6 +167,7 @@ class MLBAPIClient:
                 position = player.get('position', {}).get('abbreviation', '')
                 
                 try:
+                    # Get recent stats (last 5 games)
                     recent_stats = get_player_last_5_games(name, team_id)
                     if recent_stats and isinstance(recent_stats, dict):
                         avg = recent_stats.get('avg', 0)
@@ -177,7 +178,29 @@ class MLBAPIClient:
                         games = recent_stats.get('games', 0)
                         
                         if games > 0:
-                            stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                            # Get season stats and calculate OPS trend (for backend analysis only)
+                            try:
+                                from get_stats import compare_ops_stats
+                                comparison = compare_ops_stats(name, team_id)
+                                
+                                if comparison and comparison.get('trend'):
+                                    ops_trend = comparison['trend']
+                                    season_ops = comparison.get('season_ops')
+                                    last_5_ops = comparison.get('last_5_games_ops')
+                                    
+                                    if season_ops and last_5_ops:
+                                        # Print debug info (but don't show in stats display)
+                                        print(f"🔥❄️ {name}: Season OPS {season_ops:.3f} vs Last 5 Games OPS {last_5_ops:.3f} = {ops_trend.upper()}")
+                                        
+                                        # Keep stats display clean and simple
+                                        stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                                    else:
+                                        stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                                else:
+                                    stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                            except Exception as e:
+                                print(f"⚠️ OPS trend calculation failed for {name}: {e}")
+                                stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
                         else:
                             stats_display = "No recent data"
                     else:
@@ -191,7 +214,8 @@ class MLBAPIClient:
                     'order': idx,
                     'name': name,
                     'position': position,
-                    'recent_stats': stats_display
+                    'recent_stats': stats_display,
+                    'stats': stats_display  # Keep both for compatibility
                 })
         
         return lineup
@@ -243,7 +267,8 @@ class MLBAPIClient:
         return [{
             'name': name,
             'position': position,
-            'recent_stats': stats_display
+            'recent_stats': stats_display,
+            'stats': stats_display  # Keep both for compatibility
         }]
     
     """
@@ -266,7 +291,8 @@ class MLBAPIClient:
         return [{
             'name': name,
             'position': position,
-            'recent_stats': "No recent data"
+            'recent_stats': "No recent data",
+            'stats': "No recent data"  # Keep both for compatibility
         }]
     
 

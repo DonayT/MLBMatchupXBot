@@ -212,6 +212,7 @@ class Jinja2ImageGenerator:
             'Kansas City Royals': 118,
             'Chicago White Sox': 145,
             'Oakland Athletics': 133,
+            'Athletics': 133,  # Alternative name
             'Los Angeles Angels': 108,
             'Arizona Diamondbacks': 109,
             'Colorado Rockies': 115,
@@ -224,7 +225,15 @@ class Jinja2ImageGenerator:
             'Washington Nationals': 120,
             'Miami Marlins': 146
         }
-        return team_id_map.get(team_name, 119)  # Default to Dodgers if not found
+        
+        # Debug: Print team name lookup
+        team_id = team_id_map.get(team_name, 119)  # Default to Dodgers if not found
+        if team_id == 119 and team_name not in team_id_map:
+            print(f"⚠️ Warning: Team '{team_name}' not found in team_id_map, defaulting to Dodgers (ID: 119)")
+        else:
+            print(f"✅ Team '{team_name}' -> ID {team_id}")
+        
+        return team_id
     
     def get_player_ops_trend(self, player_name, team_name):
         """Get OPS trend (hot/cold/neutral) for a player"""
@@ -235,13 +244,19 @@ class Jinja2ImageGenerator:
             # Get team ID for statsapi lookup
             team_id = self.get_team_id_from_name(team_name)
             
+            # Debug: Print team name and ID for troubleshooting
+            print(f"🔍 Debug - {player_name}: Team '{team_name}' -> ID {team_id}")
+            
             # Import and use the OPS comparison function
             from get_stats import compare_ops_stats
             comparison = compare_ops_stats(player_name, team_id)
             
             if comparison and comparison.get('trend'):
-                return comparison['trend']
+                trend = comparison['trend']
+                print(f"🔍 Debug - {player_name}: OPS trend = {trend}")
+                return trend
             else:
+                print(f"🔍 Debug - {player_name}: No OPS trend found, defaulting to neutral")
                 return 'neutral'
                 
         except Exception as e:
@@ -375,24 +390,34 @@ class Jinja2ImageGenerator:
             return {}
     
     def process_lineup_single_pass(self, players, team_name):
-        """Process entire lineup in a single pass - simplified since OPS trends are now in stats"""
+        """Process entire lineup in a single pass - with OPS trends for color coding"""
         try:
             if not players:
                 return []
             
             processed_lineup = []
             
-            # Process each player exactly once - OPS trends are already calculated in stats
+            # Process each player exactly once - get OPS trend for color coding
             for player in players:
                 player_name = player.get('name', 'TBD')
                 position = player.get('position', '')
                 stats = self.format_player_stats(player.get('stats', 'No recent data'))
                 
-                # Add player to lineup - OPS trend info is already embedded in stats
+                # Get OPS trend for color coding
+                ops_trend = 'neutral'
+                if player_name and player_name != 'TBD':
+                    try:
+                        ops_trend = self.get_player_ops_trend(player_name, team_name)
+                    except Exception as e:
+                        print(f"⚠️ Error getting OPS trend for {player_name}: {e}")
+                        ops_trend = 'neutral'
+                
+                # Add player to lineup with OPS trend for color coding
                 processed_lineup.append({
                     'name': player_name,
                     'position': position,
-                    'stats': stats
+                    'stats': stats,
+                    'ops_trend': ops_trend
                 })
             
             return processed_lineup

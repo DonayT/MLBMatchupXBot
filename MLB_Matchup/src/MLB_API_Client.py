@@ -188,7 +188,7 @@ class MLBAPIClient:
                                     season_ops = comparison.get('season_ops')
                                     last_5_ops = comparison.get('last_5_games_ops')
                                     
-                                    if season_ops and last_5_ops:
+                                    if season_ops is not None and last_5_ops is not None:
                                         # Print debug info (but don't show in stats display)
                                         print(f"🔥❄️ {name}: Season OPS {season_ops:.3f} vs Last 5 Games OPS {last_5_ops:.3f} = {ops_trend.upper()}")
                                         

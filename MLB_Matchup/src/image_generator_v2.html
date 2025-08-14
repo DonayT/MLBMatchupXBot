@@ -241,6 +241,19 @@
                 transform-origin: left center;
             }
 
+            /* OPS Trend Color Classes */
+            .player-name.hot {
+                color: #ff0000; /* Red for hot players */
+            }
+
+            .player-name.cold {
+                color: #0000ff; /* Blue for cold players */
+            }
+
+            .player-name.neutral {
+                color: #000000; /* Black for neutral players */
+            }
+
 
 
             .symbol {
@@ -460,7 +473,7 @@
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <span class="position">{{ player.position }}</span>
-                            <span class="player-name">{{ player.name }}</span>
+                            <span class="player-name {{ player.ops_trend }}">{{ player.name }}</span>
                             <!-- <span class="symbol">🔥</span> -->
                         </div>
                         <div class="player-stats">{{ player.stats }}</div>
@@ -473,7 +486,7 @@
                     <div class="lineup-box">
                         <div class="lineup-header-row">
                             <!-- <span class="symbol">🔥</span> -->
-                            <span class="player-name">{{ player.name }}</span>
+                            <span class="player-name {{ player.ops_trend }}">{{ player.name }}</span>
                             <span class="position">{{ player.position }}</span>
                         </div>
                         <div class="player-stats">{{ player.stats }}</div>

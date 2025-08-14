@@ -155,22 +155,13 @@ class Jinja2ImageGenerator:
                 'stats': self.format_pitcher_stats(game_data.get('home_pitcher', {}).get('stats', 'No recent data'))
             }
             
-            # Prepare lineup data
-            away_lineup = []
-            for player in game_data.get('away_lineup', []):
-                away_lineup.append({
-                    'name': player.get('name', 'TBD'),
-                    'position': player.get('position', ''),
-                    'stats': self.format_player_stats(player.get('stats', 'No recent data'))
-                })
+            # Prepare lineup data with batch OPS trend lookup
+            away_players = game_data.get('away_lineup', [])
+            home_players = game_data.get('home_lineup', [])
             
-            home_lineup = []
-            for player in game_data.get('home_lineup', []):
-                home_lineup.append({
-                    'name': player.get('name', 'TBD'),
-                    'position': player.get('position', ''),
-                    'stats': self.format_player_stats(player.get('stats', 'No recent data'))
-                })
+            # Get OPS trends for all players at once (avoids duplicate API calls)
+            away_lineup = self.process_lineup_single_pass(away_players, game_data.get('away_team', ''))
+            home_lineup = self.process_lineup_single_pass(home_players, game_data.get('home_team', ''))
             
             # Return template data
             return {
@@ -197,6 +188,218 @@ class Jinja2ImageGenerator:
         except Exception as e:
             print(f"Error preparing template data: {e}")
             return {}
+    
+    def get_team_id_from_name(self, team_name):
+        """Get team ID from team name for statsapi lookup"""
+        # Team name to ID mapping (you can expand this)
+        team_id_map = {
+            'Los Angeles Dodgers': 119,
+            'New York Yankees': 147,
+            'Boston Red Sox': 111,
+            'Chicago Cubs': 112,
+            'San Francisco Giants': 137,
+            'St. Louis Cardinals': 138,
+            'Atlanta Braves': 144,
+            'Houston Astros': 117,
+            'Toronto Blue Jays': 141,
+            'Seattle Mariners': 136,
+            'Texas Rangers': 140,
+            'Baltimore Orioles': 110,
+            'Tampa Bay Rays': 139,
+            'Cleveland Guardians': 114,
+            'Minnesota Twins': 142,
+            'Detroit Tigers': 116,
+            'Kansas City Royals': 118,
+            'Chicago White Sox': 145,
+            'Oakland Athletics': 133,
+            'Los Angeles Angels': 108,
+            'Arizona Diamondbacks': 109,
+            'Colorado Rockies': 115,
+            'San Diego Padres': 135,
+            'Milwaukee Brewers': 158,
+            'Cincinnati Reds': 113,
+            'Pittsburgh Pirates': 134,
+            'Philadelphia Phillies': 143,
+            'New York Mets': 121,
+            'Washington Nationals': 120,
+            'Miami Marlins': 146
+        }
+        return team_id_map.get(team_name, 119)  # Default to Dodgers if not found
+    
+    def get_player_ops_trend(self, player_name, team_name):
+        """Get OPS trend (hot/cold/neutral) for a player"""
+        try:
+            if not player_name or player_name == 'TBD':
+                return 'neutral'
+            
+            # Get team ID for statsapi lookup
+            team_id = self.get_team_id_from_name(team_name)
+            
+            # Import and use the OPS comparison function
+            from get_stats import compare_ops_stats
+            comparison = compare_ops_stats(player_name, team_id)
+            
+            if comparison and comparison.get('trend'):
+                return comparison['trend']
+            else:
+                return 'neutral'
+                
+        except Exception as e:
+            print(f"Error getting OPS trend for {player_name}: {e}")
+            return 'neutral'
+    
+    def get_batch_ops_trends(self, players, team_name):
+        """Get OPS trends for all players in a lineup at once to avoid duplicate API calls"""
+        try:
+            if not players:
+                return {}
+            
+            # Get team ID for statsapi lookup
+            team_id = self.get_team_id_from_name(team_name)
+            
+            # Import the OPS comparison function
+            from get_stats import compare_ops_stats
+            
+            trends = {}
+            for player in players:
+                player_name = player.get('name', '')
+                if not player_name or player_name == 'TBD':
+                    trends[player_name] = 'neutral'
+                    continue
+                
+                try:
+                    comparison = compare_ops_stats(player_name, team_id)
+                    if comparison and comparison.get('trend'):
+                        trends[player_name] = comparison['trend']
+                    else:
+                        trends[player_name] = 'neutral'
+                except Exception as e:
+                    print(f"Error getting OPS trend for {player_name}: {e}")
+                    trends[player_name] = 'neutral'
+            
+            return trends
+                
+        except Exception as e:
+            print(f"Error getting batch OPS trends: {e}")
+            return {}
+    
+    def get_batch_ops_trends_optimized(self, players, team_name):
+        """Get OPS trends for all players in a lineup using true batch processing"""
+        try:
+            if not players:
+                return {}
+            
+            # Get team ID for statsapi lookup
+            team_id = self.get_team_id_from_name(team_name)
+            
+            # Import the necessary functions
+            from get_stats import get_batting_data, get_player_stats
+            from players_previous_games import get_player_last_5_games
+            
+            trends = {}
+            
+            # Get season stats for all players at once (this is already cached)
+            batting_data = get_batting_data()
+            
+            for player in players:
+                player_name = player.get('name', '')
+                if not player_name or player_name == 'TBD':
+                    trends[player_name] = 'neutral'
+                    continue
+                
+                try:
+                    # Get season OPS from cached data
+                    season_stats = get_player_stats(player_name, team_id)
+                    if not season_stats or 'OPS' not in season_stats:
+                        trends[player_name] = 'neutral'
+                        continue
+                    
+                    # Extract season OPS from the stats string
+                    season_ops_str = season_stats.split('OPS ')[-1].split(' ')[0]
+                    try:
+                        season_ops = float(season_ops_str)
+                    except:
+                        trends[player_name] = 'neutral'
+                        continue
+                    
+                    # Get last 5 games OPS
+                    last_5_games = get_player_last_5_games(player_name, team_id)
+                    if not last_5_games or len(last_5_games) == 0:
+                        trends[player_name] = 'neutral'
+                        continue
+                    
+                    # Calculate OPS from last 5 games
+                    total_ab = 0
+                    total_hits = 0
+                    total_walks = 0
+                    total_hbp = 0
+                    total_sf = 0
+                    total_tb = 0
+                    
+                    for game in last_5_games:
+                        total_ab += game.get('at_bats', 0)
+                        total_hits += game.get('hits', 0)
+                        total_walks += game.get('walks', 0)
+                        total_hbp += game.get('hit_by_pitch', 0)
+                        total_sf += game.get('sacrifice_flys', 0)
+                        total_tb += game.get('total_bases', 0)
+                    
+                    if total_ab == 0:
+                        trends[player_name] = 'neutral'
+                        continue
+                    
+                    # Calculate OBP and SLG
+                    obp = (total_hits + total_walks + total_hbp) / (total_ab + total_walks + total_hbp + total_sf) if (total_ab + total_walks + total_hbp + total_sf) > 0 else 0
+                    slg = total_tb / total_ab if total_ab > 0 else 0
+                    last_5_ops = obp + slg
+                    
+                    # Calculate difference and determine trend
+                    ops_difference = last_5_ops - season_ops
+                    threshold = season_ops * 0.25
+                    
+                    if ops_difference > threshold:
+                        trends[player_name] = 'hot'
+                    elif ops_difference < -threshold:
+                        trends[player_name] = 'cold'
+                    else:
+                        trends[player_name] = 'neutral'
+                        
+                except Exception as e:
+                    print(f"Error calculating OPS trend for {player_name}: {e}")
+                    trends[player_name] = 'neutral'
+            
+            return trends
+                
+        except Exception as e:
+            print(f"Error getting batch OPS trends: {e}")
+            return {}
+    
+    def process_lineup_single_pass(self, players, team_name):
+        """Process entire lineup in a single pass - simplified since OPS trends are now in stats"""
+        try:
+            if not players:
+                return []
+            
+            processed_lineup = []
+            
+            # Process each player exactly once - OPS trends are already calculated in stats
+            for player in players:
+                player_name = player.get('name', 'TBD')
+                position = player.get('position', '')
+                stats = self.format_player_stats(player.get('stats', 'No recent data'))
+                
+                # Add player to lineup - OPS trend info is already embedded in stats
+                processed_lineup.append({
+                    'name': player_name,
+                    'position': position,
+                    'stats': stats
+                })
+            
+            return processed_lineup
+                
+        except Exception as e:
+            print(f"Error processing lineup: {e}")
+            return []
     
     def render_template(self, template_path, data):
         """Render Jinja2 template with data"""

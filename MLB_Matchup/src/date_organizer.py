@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import datetime, timedelta
 import json
-from get_stats import initialize_stats_cache
+from get_stats import initialize_stats_cache, clear_stats_cache
 
 """
 params: None
@@ -26,7 +26,8 @@ def check_date_transition():
                     json.dump([], f)
             
             print("New day detected - initializing fresh stats cache...")
-            initialize_stats_cache()
+            clear_stats_cache()  # Clear the old cache first
+            initialize_stats_cache()  # Initialize fresh cache
             print("Stats cache initialized for new day!")
             
             with open(last_processed_file, 'w') as f:

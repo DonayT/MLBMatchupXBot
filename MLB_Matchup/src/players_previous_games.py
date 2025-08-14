@@ -61,9 +61,16 @@ def get_player_last_5_games(player_name, team_id=119, season=2025):
                         "walks": batting_stats.get('baseOnBalls', 0),
                         "hit_by_pitch": batting_stats.get('hitByPitch', 0),
                         "sacrifice_flys": batting_stats.get('sacrificeFlies', 0),
-                        "total_bases": batting_stats.get('totalBases', 0),
+                        "doubles": batting_stats.get('doubles', 0),
+                        "triples": batting_stats.get('triples', 0),
                         "strikeouts": batting_stats.get('strikeOuts', 0)
                     }
+                    
+                    # Calculate total bases manually since statsapi doesn't provide it
+                    game_info["total_bases"] = (game_info["hits"] + 
+                                              game_info["doubles"] + 
+                                              (2 * game_info["triples"]) + 
+                                              (3 * game_info["hr"]))
                     
                     last_5_games.append(game_info)
                     

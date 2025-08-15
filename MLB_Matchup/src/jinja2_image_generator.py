@@ -235,160 +235,6 @@ class Jinja2ImageGenerator:
         
         return team_id
     
-    def get_player_ops_trend(self, player_name, team_name):
-        """Get OPS trend (hot/cold/neutral) for a player"""
-        try:
-            if not player_name or player_name == 'TBD':
-                return 'neutral'
-            
-            # Get team ID for statsapi lookup
-            team_id = self.get_team_id_from_name(team_name)
-            
-            # Debug: Print team name and ID for troubleshooting
-            print(f"🔍 Debug - {player_name}: Team '{team_name}' -> ID {team_id}")
-            
-            # Import and use the OPS comparison function
-            from get_stats import compare_ops_stats
-            comparison = compare_ops_stats(player_name, team_id)
-            
-            if comparison and comparison.get('trend'):
-                trend = comparison['trend']
-                print(f"🔍 Debug - {player_name}: OPS trend = {trend}")
-                return trend
-            else:
-                print(f"🔍 Debug - {player_name}: No OPS trend found, defaulting to neutral")
-                return 'neutral'
-                
-        except Exception as e:
-            print(f"Error getting OPS trend for {player_name}: {e}")
-            return 'neutral'
-    
-    def get_batch_ops_trends(self, players, team_name):
-        """Get OPS trends for all players in a lineup at once to avoid duplicate API calls"""
-        try:
-            if not players:
-                return {}
-            
-            # Get team ID for statsapi lookup
-            team_id = self.get_team_id_from_name(team_name)
-            
-            # Import the OPS comparison function
-            from get_stats import compare_ops_stats
-            
-            trends = {}
-            for player in players:
-                player_name = player.get('name', '')
-                if not player_name or player_name == 'TBD':
-                    trends[player_name] = 'neutral'
-                    continue
-                
-                try:
-                    comparison = compare_ops_stats(player_name, team_id)
-                    if comparison and comparison.get('trend'):
-                        trends[player_name] = comparison['trend']
-                    else:
-                        trends[player_name] = 'neutral'
-                except Exception as e:
-                    print(f"Error getting OPS trend for {player_name}: {e}")
-                    trends[player_name] = 'neutral'
-            
-            return trends
-                
-        except Exception as e:
-            print(f"Error getting batch OPS trends: {e}")
-            return {}
-    
-    def get_batch_ops_trends_optimized(self, players, team_name):
-        """Get OPS trends for all players in a lineup using true batch processing"""
-        try:
-            if not players:
-                return {}
-            
-            # Get team ID for statsapi lookup
-            team_id = self.get_team_id_from_name(team_name)
-            
-            # Import the necessary functions
-            from get_stats import get_batting_data, get_player_stats
-            from players_previous_games import get_player_last_5_games
-            
-            trends = {}
-            
-            # Get season stats for all players at once (this is already cached)
-            batting_data = get_batting_data()
-            
-            for player in players:
-                player_name = player.get('name', '')
-                if not player_name or player_name == 'TBD':
-                    trends[player_name] = 'neutral'
-                    continue
-                
-                try:
-                    # Get season OPS from cached data
-                    season_stats = get_player_stats(player_name, team_id)
-                    if not season_stats or 'OPS' not in season_stats:
-                        trends[player_name] = 'neutral'
-                        continue
-                    
-                    # Extract season OPS from the stats string
-                    season_ops_str = season_stats.split('OPS ')[-1].split(' ')[0]
-                    try:
-                        season_ops = float(season_ops_str)
-                    except:
-                        trends[player_name] = 'neutral'
-                        continue
-                    
-                    # Get last 5 games OPS
-                    last_5_games = get_player_last_5_games(player_name, team_id)
-                    if not last_5_games or len(last_5_games) == 0:
-                        trends[player_name] = 'neutral'
-                        continue
-                    
-                    # Calculate OPS from last 5 games
-                    total_ab = 0
-                    total_hits = 0
-                    total_walks = 0
-                    total_hbp = 0
-                    total_sf = 0
-                    total_tb = 0
-                    
-                    for game in last_5_games:
-                        total_ab += game.get('at_bats', 0)
-                        total_hits += game.get('hits', 0)
-                        total_walks += game.get('walks', 0)
-                        total_hbp += game.get('hit_by_pitch', 0)
-                        total_sf += game.get('sacrifice_flys', 0)
-                        total_tb += game.get('total_bases', 0)
-                    
-                    if total_ab == 0:
-                        trends[player_name] = 'neutral'
-                        continue
-                    
-                    # Calculate OBP and SLG
-                    obp = (total_hits + total_walks + total_hbp) / (total_ab + total_walks + total_hbp + total_sf) if (total_ab + total_walks + total_hbp + total_sf) > 0 else 0
-                    slg = total_tb / total_ab if total_ab > 0 else 0
-                    last_5_ops = obp + slg
-                    
-                    # Calculate difference and determine trend
-                    ops_difference = last_5_ops - season_ops
-                    threshold = season_ops * 0.25
-                    
-                    if ops_difference > threshold:
-                        trends[player_name] = 'hot'
-                    elif ops_difference < -threshold:
-                        trends[player_name] = 'cold'
-                    else:
-                        trends[player_name] = 'neutral'
-                        
-                except Exception as e:
-                    print(f"Error calculating OPS trend for {player_name}: {e}")
-                    trends[player_name] = 'neutral'
-            
-            return trends
-                
-        except Exception as e:
-            print(f"Error getting batch OPS trends: {e}")
-            return {}
-    
     def process_lineup_single_pass(self, players, team_name):
         """Process entire lineup in a single pass - with OPS trends for color coding"""
         try:
@@ -402,15 +248,10 @@ class Jinja2ImageGenerator:
                 player_name = player.get('name', 'TBD')
                 position = player.get('position', '')
                 stats = self.format_player_stats(player.get('stats', 'No recent data'))
+                ops_trend = player.get('ops_trend', 'neutral')
                 
-                # Get OPS trend for color coding
-                ops_trend = 'neutral'
-                if player_name and player_name != 'TBD':
-                    try:
-                        ops_trend = self.get_player_ops_trend(player_name, team_name)
-                    except Exception as e:
-                        print(f"⚠️ Error getting OPS trend for {player_name}: {e}")
-                        ops_trend = 'neutral'
+                # Debug: Print the ops_trend values being processed
+                print(f"🔍 DEBUG - Player: {player_name}, OPS Trend: '{ops_trend}' (type: {type(ops_trend)})")
                 
                 # Add player to lineup with OPS trend for color coding
                 processed_lineup.append({
@@ -580,7 +421,7 @@ def create_lineup_image_example():
             'stats': 'ERA: 2.95 | WHIP: 1.08 | K: 178 | IP: 185.2'
         },
         'away_lineup': [
-            {'name': 'Pete Crow-Amrstrong', 'position': 'CF', 'stats': 'AVG: .298 | OPS: .812 | H: 89 | HR: 8 | SO: 67 | RBI: 45'},
+            {'name': 'Pete Crow-Amrstrong', 'position': 'CF', 'stats': 'AVG: .298 | OPS: .812 | H: 89 | HR: 8 | SO: 67 | RBI: 45', 'ops_trend': 'hot'},
             {'name': 'Christian Encarnacion-Strand', 'position': '3B', 'stats': 'AVG: .275 | OPS: .890 | H: 102 | HR: 25 | SO: 89 | RBI: 78'},
             {'name': 'Triston Casas', 'position': '1B', 'stats': 'AVG: .263 | OPS: .856 | H: 76 | HR: 18 | SO: 82 | RBI: 52'},
             {'name': 'Masataka Yoshida', 'position': 'LF', 'stats': 'AVG: .289 | OPS: .783 | H: 95 | HR: 12 | SO: 58 | RBI: 61'},
@@ -591,8 +432,8 @@ def create_lineup_image_example():
             {'name': 'Wilyer Abreu', 'position': 'RF', 'stats': 'AVG: .256 | OPS: .745 | H: 51 | HR: 7 | SO: 48 | RBI: 35'}
         ],
         'home_lineup': [
-            {'name': 'DJ LeMahieu', 'position': '3B', 'stats': 'AVG: .267 | OPS: .745 | H: 78 | HR: 12 | SO: 62 | RBI: 48'},
-            {'name': 'Aaron Judge', 'position': 'CF', 'stats': 'AVG: .291 | OPS: .987 | H: 89 | HR: 32 | SO: 79 | RBI: 78'},
+            {'name': 'DJ LeMahieu', 'position': '3B', 'stats': 'AVG: .267 | OPS: .745 | H: 78 | HR: 12 | SO: 62 | RBI: 48', 'ops_trend': 'hot'},
+            {'name': 'Aaron Judge', 'position': 'CF', 'stats': 'AVG: .291 | OPS: .987 | H: 89 | HR: 32 | SO: 79 | RBI: 78', 'ops_trend': 'cold'},
             {'name': 'Giancarlo Stanton', 'position': 'DH', 'stats': 'AVG: .245 | OPS: .785 | H: 67 | HR: 18 | SO: 85 | RBI: 52'},
             {'name': 'Anthony Rizzo', 'position': '1B', 'stats': 'AVG: .278 | OPS: .812 | H: 82 | HR: 15 | SO: 71 | RBI: 58'},
             {'name': 'Gleyber Torres', 'position': '2B', 'stats': 'AVG: .263 | OPS: .756 | H: 89 | HR: 14 | SO: 68 | RBI: 62'},

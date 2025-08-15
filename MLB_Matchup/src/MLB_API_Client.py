@@ -166,9 +166,19 @@ class MLBAPIClient:
                 name = player.get('person', {}).get('fullName', 'Unknown')
                 position = player.get('position', {}).get('abbreviation', '')
                 
+                # Remove accents from player names to avoid encoding issues
+                import unicodedata
+                name_normalized = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('ascii')
+                
+                # Initialize ops_trend with default value
+                ops_trend = 'neutral'
+                
                 try:
+
+
+                    
                     # Get recent stats (last 5 games)
-                    recent_stats = get_player_last_5_games(name, team_id)
+                    recent_stats = get_player_last_5_games(name_normalized, team_id)
                     if recent_stats and isinstance(recent_stats, dict):
                         avg = recent_stats.get('avg', 0)
                         ops = recent_stats.get('ops', 0)
@@ -181,7 +191,7 @@ class MLBAPIClient:
                             # Get season stats and calculate OPS trend (for backend analysis only)
                             try:
                                 from get_stats import compare_ops_stats
-                                comparison = compare_ops_stats(name, team_id)
+                                comparison = compare_ops_stats(name_normalized, team_id)
                                 
                                 if comparison and comparison.get('trend'):
                                     ops_trend = comparison['trend']
@@ -215,7 +225,8 @@ class MLBAPIClient:
                     'name': name,
                     'position': position,
                     'recent_stats': stats_display,
-                    'stats': stats_display  # Keep both for compatibility
+                    'stats': stats_display,
+                    'ops_trend': ops_trend
                 })
         
         return lineup
@@ -245,8 +256,12 @@ class MLBAPIClient:
         name = player.get('person', {}).get('fullName', 'Unknown')
         position = player.get('position', {}).get('abbreviation', '')
         
+        # Remove accents from pitcher names to avoid encoding issues
+        import unicodedata
+        name_normalized = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('ascii')
+        
         try:
-            recent_stats = get_pitcher_last_3_games(name, team_id)
+            recent_stats = get_pitcher_last_3_games(name_normalized, team_id)
             if recent_stats and isinstance(recent_stats, dict):
                 era = recent_stats.get('era', 0)
                 whip = recent_stats.get('whip', 0)

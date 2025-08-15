@@ -22,7 +22,7 @@ def upload_image_to_twitter(image_path, game_data):
         
         tweet_text = f"{game_data['away_team']} @ {game_data['home_team']}\n"
         tweet_text += f"🕐 {game_data['game_time']} 📅 {game_data['game_date']}\n"
-        tweet_text += f"*Statistics are over last 5 games*\n"
+        tweet_text += f"*Batter statistics are over last 5 games*\n*Pitcher statistics are over last 3 outtings*\n"
         tweet_text += f"{away_hashtag} {home_hashtag}\n"
         tweet_text += f"#{away_abr}vs{home_abr} // #{home_abr}vs{away_abr}"
         

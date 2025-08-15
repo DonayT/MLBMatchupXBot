@@ -1,13 +1,17 @@
 from datetime import datetime
 import statsapi
 import os
+import sys
 
 from game_data_processor import GameDataProcessor
 from game_queue import GameQueue
 from date_organizer import check_date_transition, organize_existing_images
 from jinja2_image_generator import Jinja2ImageGenerator
-from x_uploader import upload_image_to_twitter
 from get_stats import clear_stats_cache
+
+# Add Xbot directory to path for x_uploader import
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Xbot'))
+from x_uploader import upload_image_to_twitter
 
 class MLBMatchup:
     def __init__(self):

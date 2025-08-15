@@ -120,13 +120,14 @@ class MLBMatchup:
                 print(f"      First player: {game_data['home_lineup'][0]}")
             
             # Format the game data to match what Jinja2ImageGenerator expects
-            # Fix: Map the lineup data correctly with stats field
+            # Fix: Map the lineup data correctly with stats field and preserve OPS trend
             formatted_away_lineup = []
             for player in game_data['away_lineup']:
                 formatted_away_lineup.append({
                     'name': player.get('name', 'TBD'),
                     'position': player.get('position', ''),
-                    'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                    'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
+                    'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
                 })
             
             formatted_home_lineup = []
@@ -134,7 +135,8 @@ class MLBMatchup:
                 formatted_home_lineup.append({
                     'name': player.get('name', 'TBD'),
                     'position': player.get('position', ''),
-                    'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                    'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
+                    'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
                 })
             
             formatted_game_data = {

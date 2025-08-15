@@ -424,7 +424,7 @@ def create_lineup_image_example():
             {'name': 'Pete Crow-Amrstrong', 'position': 'CF', 'stats': 'AVG: .298 | OPS: .812 | H: 89 | HR: 8 | SO: 67 | RBI: 45', 'ops_trend': 'hot'},
             {'name': 'Christian Encarnacion-Strand', 'position': '3B', 'stats': 'AVG: .275 | OPS: .890 | H: 102 | HR: 25 | SO: 89 | RBI: 78'},
             {'name': 'Triston Casas', 'position': '1B', 'stats': 'AVG: .263 | OPS: .856 | H: 76 | HR: 18 | SO: 82 | RBI: 52'},
-            {'name': 'Masataka Yoshida', 'position': 'LF', 'stats': 'AVG: .289 | OPS: .783 | H: 95 | HR: 12 | SO: 58 | RBI: 61'},
+            {'name': 'Masataka Yoshida', 'position': 'LF', 'stats': 'AVG: .289 | OPS: 1.283 | H: 95 | HR: 12 | SO: 58 | RBI: 61'},
             {'name': 'Connor Wong', 'position': 'C', 'stats': 'AVG: .245 | OPS: .712 | H: 67 | HR: 9 | SO: 71 | RBI: 38'},
             {'name': 'Pablo Reyes', 'position': '2B', 'stats': 'AVG: .271 | OPS: .734 | H: 58 | HR: 6 | SO: 45 | RBI: 32'},
             {'name': 'Ceddanne Rafaela', 'position': 'SS', 'stats': 'AVG: .234 | OPS: .678 | H: 43 | HR: 5 | SO: 52 | RBI: 28'},

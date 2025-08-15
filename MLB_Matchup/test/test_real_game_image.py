@@ -120,7 +120,8 @@ def test_real_game_image():
             formatted_away_lineup.append({
                 'name': player.get('name', 'TBD'),
                 'position': player.get('position', ''),
-                'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
+                'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
             })
         
         formatted_home_lineup = []
@@ -128,7 +129,8 @@ def test_real_game_image():
             formatted_home_lineup.append({
                 'name': player.get('name', 'TBD'),
                 'position': player.get('position', ''),
-                'stats': player.get('recent_stats', 'No recent data')  # Map recent_stats to stats
+                'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
+                'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
             })
         
         formatted_game_data = {

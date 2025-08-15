@@ -9,6 +9,7 @@
                 src: url(data:font/truetype;base64,{{ anton_font_b64 }}) format('truetype');
                 font-weight: normal;
                 font-style: normal;
+                font-display: swap;
             }
 
             @font-face {
@@ -16,6 +17,7 @@
                 src: url(data:font/truetype;base64,{{ worksans_regular_font_b64 }}) format('truetype');
                 font-weight: normal;
                 font-style: normal;
+                font-display: swap;
             }
 
             @font-face {
@@ -23,6 +25,7 @@
                 src: url(data:font/truetype;base64,{{ worksans_bold_font_b64 }}) format('truetype');
                 font-weight: bold;
                 font-style: normal;
+                font-display: swap;
             }
 
             /* Team color CSS variables - will be set dynamically */
@@ -400,6 +403,16 @@
             }
         </style>
         <script>
+            // Wait for all fonts to load before proceeding
+            document.fonts.ready.then(function() {
+                console.log('All fonts loaded successfully');
+                adjustAllFontSizes();
+            }).catch(function(error) {
+                console.error('Font loading error:', error);
+                // Fallback: try to adjust fonts anyway
+                setTimeout(adjustAllFontSizes, 1000);
+            });
+            
             // Function to adjust font size for long names
             function adjustFontSize(element, maxWidth, baseFontSize) {
                 const text = element.textContent;
@@ -410,8 +423,7 @@
                 }
             }
             
-            // Apply font size adjustments when page loads
-            window.addEventListener('load', function() {
+            function adjustAllFontSizes() {
                 // Adjust pitcher names
                 document.querySelectorAll('.pitcher-name').forEach(function(element) {
                     adjustFontSize(element, 500, 44);
@@ -421,6 +433,15 @@
                 document.querySelectorAll('.player-name').forEach(function(element) {
                     adjustFontSize(element, 500, 44);
                 });
+            }
+            
+            // Also try on window load as backup
+            window.addEventListener('load', function() {
+                if (document.fonts.ready) {
+                    adjustAllFontSizes();
+                } else {
+                    setTimeout(adjustAllFontSizes, 500);
+                }
             });
         </script>
     </head>

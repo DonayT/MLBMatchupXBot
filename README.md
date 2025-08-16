@@ -4,13 +4,25 @@
   <img src="MLB_Matchup/images/logo/MLBMatchupBotLogo.png" alt="MLBMatchupXBot Logo" width="200"/>
   <br>
   <em>Automated MLB Lineup Cards with Enhanced Statistics</em>
+  <br>
+  <a href="https://github.com/yourusername/MLBMatchupXBot/releases">
+    <img src="https://img.shields.io/badge/version-v2.0-blue.svg" alt="Version 2.0"/>
+  </a>
 </div>
 
-An automated X (Twitter) bot that posts daily Major League Baseball (MLB) lineup cards with enhanced statistics and modern design.
+An automated X (Twitter) bot that posts daily Major League Baseball (MLB) lineup cards with enhanced statistics and modern design. **Version 2.0** brings improved performance, enhanced image generation, and better automation reliability.
 
 **X Profile**: https://x.com/MLB_Matchup_Bot
 
 **Automation**: Powered by [cron-job.org](https://cron-job.org) and [GitHub Actions](https://github.com/features/actions) for reliable scheduled posting
+
+## 🆕 What's New in Version 2.0
+
+- **Enhanced Image Generation**: Improved lineup card design with better typography and layout
+- **Performance Improvements**: Optimized API calls and faster image processing
+- **Better Error Handling**: More robust fallback systems and error recovery
+- **Improved Automation**: Enhanced reliability with better monitoring and retry logic
+- **Code Refactoring**: Cleaner, more maintainable codebase structure
 
 ## 🏟️ Features
 
@@ -27,33 +39,40 @@ An automated X (Twitter) bot that posts daily Major League Baseball (MLB) lineup
 MLBMatchupXBot/
 ├── MLB_Matchup/
 │   ├── src/
-│   │   ├── Main.py                    # Main orchestrator
-│   │   ├── MLBMatchup.py              # Entry point wrapper
-│   │   ├── game_data_processor.py     # Game data extraction
-│   │   ├── game_queue.py              # Queue management
-│   │   ├── twitter_image_generator.py # Image creation
-│   │   ├── MLB_API_Client.py          # MLB API integration
-│   │   ├── get_stats.py               # Statistics module
-│   │   ├── date_organizer.py          # Date/file management
-│   │   ├── lineup_validator.py        # Lineup validation
-│   │   ├── get_address.py             # Venue information
-│   │   └── test_image_generator.py    # Testing utilities
+│   │   ├── Main.py                    # Main orchestrator and entry point
+│   │   ├── MLBMatchup.py              # Core workflow orchestrator
+│   │   ├── game_data_processor.py     # Game data extraction and processing
+│   │   ├── game_queue.py              # Queue management and duplicate prevention
+│   │   ├── jinja2_image_generator.py  # Modern image generation using Jinja2
+│   │   ├── html_to_image_converter.py # HTML to image conversion utility
+│   │   ├── image_generator_v2.html    # HTML template for lineup cards
+│   │   ├── twitter_image_generator.py # Legacy image generation (deprecated)
+│   │   ├── MLB_API_Client.py          # MLB API integration and data fetching
+│   │   ├── get_stats.py               # Player statistics and team records
+│   │   ├── players_previous_games.py  # Player performance history
+│   │   ├── date_organizer.py          # Date/file organization and management
+│   │   ├── lineup_validator.py        # Lineup validation and verification
+│   │   └── get_address.py             # Venue and location information
 │   ├── config/
-│   │   ├── mock_game_data.py          # Test data
-│   │   ├── teamPrimaryColors.json     # Team color schemes
-│   │   ├── teamSecondaryColors.json   # Secondary colors
-│   │   ├── teamAbreviations.json      # Team abbreviations
-│   │   ├── teamHashtags.json          # Team hashtags
-│   │   ├── teamVenues.json            # Venue information
-│   │   ├── stateAbbreviations.json    # State codes
-│   │   └── static/                    # Font files
+│   │   ├── mock_game_data.py          # Test data for development
+│   │   ├── teamPrimaryColors.json     # Team primary color schemes
+│   │   ├── teamSecondaryColors.json   # Team secondary colors
+│   │   ├── teamAbreviations.json      # Team abbreviations mapping
+│   │   ├── teamHashtags.json          # Team hashtags for social media
+│   │   ├── teamVenues.json            # Stadium and venue information
+│   │   ├── stateAbbreviations.json    # State abbreviation mapping
+│   │   └── static/                    # Font files and static assets
 │   ├── data/
-│   │   ├── processed_games.json       # Queue tracking
-│   │   └── last_processed_date.txt    # Date tracking
-│   └── images/                        # Generated lineup cards
+│   │   ├── processed_games.json       # Queue tracking and processed games
+│   │   └── last_processed_date.txt    # Date transition tracking
+│   ├── images/                        # Generated lineup cards organized by date
+│   └── templates/                     # Image templates and assets
 ├── Xbot/
-│   └── bot.py                         # Twitter upload module
-└── requirements.txt                    # Dependencies
+│   ├── x_uploader.py                  # Twitter image upload functionality
+│   ├── bot.py                         # Twitter API integration
+│   └── connectionCheck.py             # Connection verification utility
+├── test/                              # Test suite and test images
+└── requirements.txt                    # Python dependencies
 ```
 
 ## 🚀 Quick Start
@@ -109,11 +128,17 @@ The bot uses multiple automation strategies for reliability:
 
 ### Core Modules
 
-- **Main.py**: Orchestrates the entire process flow
-- **game_data_processor.py**: Extracts and processes game information
-- **twitter_image_generator.py**: Creates professional lineup cards
-- **get_stats.py**: Handles player statistics and team records
-- **game_queue.py**: Manages processed games to prevent duplicates
+- **Main.py**: Entry point that orchestrates the entire process flow
+- **MLBMatchup.py**: Core workflow orchestrator that manages game processing, image generation, and Twitter uploads
+- **game_data_processor.py**: Extracts and processes game information from MLB API
+- **jinja2_image_generator.py**: Modern image generation system using Jinja2 templates for professional lineup cards
+- **html_to_image_converter.py**: Utility for converting HTML templates to high-quality images
+- **get_stats.py**: Handles player statistics, team records, and performance data
+- **players_previous_games.py**: Manages player performance history and recent game statistics
+- **game_queue.py**: Manages processed games to prevent duplicates and track completion status
+- **date_organizer.py**: Handles date transitions and organizes generated images by date
+- **lineup_validator.py**: Validates lineup data and ensures data integrity
+- **MLB_API_Client.py**: Manages MLB API interactions and data fetching
 
 ### Key Features
 
@@ -141,12 +166,16 @@ The bot creates professional lineup cards featuring:
 
 ## 🔄 Workflow
 
-1. **Schedule Check**: Retrieves today's MLB games
-2. **Lineup Monitoring**: Waits for official lineup submissions
-3. **Data Processing**: Extracts game data and player stats
-4. **Image Generation**: Creates professional lineup cards
-5. **Queue Management**: Tracks processed games
-6. **Twitter Upload**: Posts images with game information
+1. **Date Organization**: Checks for date transitions and organizes existing images by date
+2. **Schedule Retrieval**: Fetches today's MLB games from the official API
+3. **Queue Management**: Identifies unprocessed games and prevents duplicate processing
+4. **Lineup Monitoring**: Continuously checks for official lineup submissions
+5. **Data Processing**: Extracts comprehensive game data, player stats, and team records
+6. **Image Generation**: Creates professional lineup cards using Jinja2 templates and HTML conversion
+7. **Quality Validation**: Ensures lineup data integrity and image quality
+8. **Twitter Upload**: Posts generated images with game information and team hashtags
+9. **Cache Management**: Clears statistics cache for fresh data on subsequent runs
+10. **Status Tracking**: Marks games as processed and maintains processing history
 
 ## 🧪 Testing
 

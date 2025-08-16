@@ -4,10 +4,18 @@ class GameDataProcessor:
     def __init__(self):
         self.mlb_api_client = MLBAPIClient()
 
+    """
+    params: game (dict) - Game dictionary from MLB schedule containing game information
+    returns: dict - Complete game data including lineups, pitchers, venue, and lineup status
+    summary: Process raw game data and extract comprehensive game information including player lineups and stats
+    """
     def get_game_data(self, game):
         game_id = game['game_id']
         home = game['home_name']
         away = game['away_name']
+        
+        home_team_id = game.get('home_id', 119)
+        away_team_id = game.get('away_id', 119)
         
         boxscore = self.mlb_api_client.get_boxscore(game_id)
         
@@ -34,14 +42,26 @@ class GameDataProcessor:
             'game_time': formatted_time,
             'home_lineup': [],
             'away_lineup': [],
+            'home_pitchers': [],
+            'away_pitchers': [],
             'venue': venue_name,
             'city': city,
             'state': state,
             'lineups_official': self.mlb_api_client.are_lineups_official(boxscore)
         }
         
-        game_data['home_lineup'] = self.mlb_api_client.extract_lineup_data(boxscore, 'home')
-        game_data['away_lineup'] = self.mlb_api_client.extract_lineup_data(boxscore, 'away')
+        if game_data['lineups_official']:
+            print(f"   Lineups official - fetching player stats...")
+            game_data['home_lineup'] = self.mlb_api_client.extract_lineup_data(boxscore, 'home', home_team_id)
+            game_data['away_lineup'] = self.mlb_api_client.extract_lineup_data(boxscore, 'away', away_team_id)
+            game_data['home_pitchers'] = self.mlb_api_client.extract_pitcher_data(boxscore, 'home', home_team_id)
+            game_data['away_pitchers'] = self.mlb_api_client.extract_pitcher_data(boxscore, 'away', away_team_id)
+        else:
+            print(f"   Lineups not official - skipping player stats...")
+            game_data['home_lineup'] = self.mlb_api_client.extract_lineup_data_basic(boxscore, 'home')
+            game_data['away_lineup'] = self.mlb_api_client.extract_lineup_data_basic(boxscore, 'away')
+            game_data['home_pitchers'] = self.mlb_api_client.extract_pitcher_data_basic(boxscore, 'home')
+            game_data['away_pitchers'] = self.mlb_api_client.extract_pitcher_data_basic(boxscore, 'away')
     
         return game_data
 

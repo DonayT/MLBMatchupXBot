@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>MLB Lineup Bot</title>
+        <style>
+            @font-face {
+                font-family: 'Anton';
+                src: url(data:font/truetype;base64,{{ anton_font_b64 }}) format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+            }
+
+            @font-face {
+                font-family: 'WorkSans-Regular';
+                src: url(data:font/truetype;base64,{{ worksans_regular_font_b64 }}) format('truetype');
+                font-weight: normal;
+                font-style: normal;
+                font-display: swap;
+            }
+
+            @font-face {
+                font-family: 'WorkSans-Bold';
+                src: url(data:font/truetype;base64,{{ worksans_bold_font_b64 }}) format('truetype');
+                font-weight: bold;
+                font-style: normal;
+                font-display: swap;
+            }
+
+            /* Team color CSS variables - will be set dynamically */
+            :root {
+                --away-primary-color: {{ away_primary_color }};
+                --away-secondary-color: {{ away_secondary_color }};
+                --home-primary-color: {{ home_primary_color }};
+                --home-secondary-color: {{ home_secondary_color }};
+            }
+
+            .card {
+                width: 1200px;
+                height: 1400px;
+                padding: 20px 30px 20px 20px; /* top right bottom left */
+                box-sizing: border-box;
+                /* background: linear-gradient(90deg, #00385dcc, #002D72cc); */
+            }
+
+            .top-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                position: relative;
+                height: 20%;
+            }
+
+            .team {
+                position: absolute;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .team:first-child {
+                left: 20%;
+                transform: translateX(-50%);
+                margin-top: -80px;  /* Move up to avoid clipping with stadium name */
+            }
+
+            .team:last-child {
+                right: 20%;
+                transform: translateX(50%);
+                margin-top: -80px;  /* Move up to avoid clipping with stadium name */
+            }
+
+            .team-abbreviation {
+                font-family: 'Anton', 'Impact', 'Arial Black', sans-serif;
+                font-weight: normal;
+                font-size: 250px;
+                line-height: 1;
+                letter-spacing: -2px;
+                margin-top: 40px;
+                user-select: none;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+             /* Team colors and outlines */
+            .away-team-colors {
+                color: var(--away-primary-color);
+                -webkit-text-stroke: 6px var(--away-secondary-color);
+                text-stroke: 6px var(--away-secondary-color);
+            }
+
+            .home-team-colors {
+                color: var(--home-primary-color);
+                -webkit-text-stroke: 6px var(--home-secondary-color);
+                text-stroke: 6px var(--home-secondary-color);
+            }
+
+            .team-record {
+                font-weight: bold;
+                font-size: 40px;
+                margin-top: -10px;
+            }
+
+            .away-team-record {
+                color: #000000;
+            }
+
+            .home-team-record {
+                color: #000000;
+            }
+
+            .vs {
+                font-family: 'WorkSans-Bold', sans-serif;
+                position: absolute;
+                left: 50%;
+                top: 30%;
+                transform: translate(-50%, -50%);
+                font-weight: 900;
+                font-size: 110px;
+                margin: 0;
+                margin-top: 10px;
+                user-select: none;
+                z-index: 10;
+            }
+
+            .game-info {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 30px;
+                line-height: 1.3;
+                color: rgb(0, 0, 0);
+                width: 100%;
+                text-align: center;
+                margin-top: 40px;
+            }
+
+            .pitcher-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                position: relative;
+                height: 10%;
+            }
+
+            .away-pitcher {
+                position: absolute;
+                left: 24%;
+                transform: translateX(-50%);
+            }
+
+            .home-pitcher {
+                position: absolute;
+                right: 24%;
+                transform: translateX(50%);
+            }
+
+            .pitcher-box {
+                border: 6px solid #000000;
+                padding: 15px;
+                margin-top: 20px;
+                background-color: #c0c0c0;
+                position: relative;
+                width: 525px;
+                text-align: center;
+            }
+
+            .pitcher-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0px;
+                position: relative;
+                height: 80px;
+            }
+
+            .position {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 30px;
+                font-weight: bold;
+                color: #000000;
+                text-orientation: mixed;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80px;
+                margin: 0 10px;
+                position: absolute;
+                top: 2px;
+            }
+
+            .position-pitcher {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 30px;
+                font-weight: bold;
+                color: #000000;
+                text-orientation: mixed;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80px;
+                margin: 0 10px;
+                position: absolute;
+                top: 2px;
+            }
+
+            .pitcher-name {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-size: 48px;
+                font-weight: bold;
+                color: #000000;
+                position: absolute;
+                top: 10px;
+                
+                /* Dynamic font sizing for long names */
+                white-space: nowrap;
+                overflow: visible;
+                max-width: 500px;
+                
+                /* Use a more reliable approach for font scaling */
+                font-size: 44px;
+                transform-origin: left center;
+            }
+
+            .player-name {
+                font-family: 'WorkSans-Bold', sans-serif;
+                font-weight: bold;
+                font-size: 48px;
+                color: #000000;
+                position: absolute;
+                top: 10px;
+                
+                /* Dynamic font sizing for long names */
+                white-space: nowrap;
+                overflow: visible;
+                max-width: 500px;
+                
+                /* Use a more reliable approach for font scaling */
+                font-size: 44px;
+                transform-origin: left center;
+                
+
+            }
+
+            /* Make these rules more specific to override base styles */
+            .lineup-box .lineup-header-row .player-name.hot {
+                color: #ff0000 !important; /* Red for hot players */
+                font-weight: bold !important;
+            }
+
+            .lineup-box .lineup-header-row .player-name.cold {
+                color: #0000ff !important; /* Blue for cold players */
+                font-weight: bold !important;
+            }
+
+            .lineup-box .lineup-header-row .player-name.neutral {
+                color: #000000 !important; /* Black for neutral players */
+                font-weight: bold !important;
+            }
+
+
+
+            .symbol {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-size: 50px;
+                font-weight: bold;
+                color: #000000;
+                position: absolute;
+                top: 10px;
+            }
+
+            .pitcher-stats {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-style: italic;
+                font-size: 18px;
+                color: #000000;
+                margin-top: 0px;
+                padding-top: 0px;
+                position: absolute;
+                top: 80px;
+            }
+
+            .lineup-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                width: 100%;
+                padding: 0px;
+                gap: 0px;
+            }
+
+            .away-lineup, .home-lineup {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .lineup-box {
+                border: none;
+                padding: 2px;
+                margin-top: 10px;
+                background-color: #ffffff00;
+                position: relative;
+                width: 570px;
+                text-align: center;
+            }
+
+            .lineup-header-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0px;
+                position: relative;
+                height: 80px;
+            }
+
+            .player-stats {
+                font-family: 'WorkSans-Regular', sans-serif;
+                font-style: italic;
+                font-size: 18px;
+                color: #2e2d2d;
+                margin-top: 0px;
+                padding-top: 0px;
+                position: absolute;
+                top: 65px;
+            }
+
+            .away-lineup .player-stats {
+                text-align: left;
+                left: 86px;
+            }
+
+            .home-lineup .player-stats {
+                text-align: right;
+                right: 86px;
+            }
+
+            .away-pitcher .pitcher-stats {
+                text-align: left;
+                left: 95px;
+            }
+
+            .home-pitcher .pitcher-stats {
+                text-align: right;
+                right: 95px;
+            }
+
+            .away-lineup .player-name {
+                text-align: left;
+                left: 85px;
+            }
+
+            .home-lineup .player-name {
+                text-align: right;
+                right: 80px;
+            }
+
+            .away-pitcher .pitcher-name {
+                text-align: left;
+                left: 80px;
+            }
+
+            .home-pitcher .pitcher-name {
+                text-align: right;
+                right: 80px;
+            }
+
+            .away-lineup .position {
+                left: 0px;
+            }
+
+            .home-lineup .position {
+                right: 0px;
+            }
+
+            .away-pitcher .position-pitcher {
+                left: 0px;
+            }
+
+            .home-pitcher .position-pitcher {
+                right: 0px;
+            }
+
+            .away-lineup .symbol {
+                right: 0px;
+            }
+
+            .home-lineup .symbol {
+                left: 0px;
+            }
+
+            .away-pitcher .symbol {
+                right: 0px;
+            }
+
+            .home-pitcher .symbol {
+                left: -5px;
+            }
+        </style>
+        <script>
+            // Wait for all fonts to load before proceeding
+            document.fonts.ready.then(function() {
+                console.log('All fonts loaded successfully');
+                adjustAllFontSizes();
+            }).catch(function(error) {
+                console.error('Font loading error:', error);
+                // Fallback: try to adjust fonts anyway
+                setTimeout(adjustAllFontSizes, 1000);
+            });
+            
+            // Function to adjust font size for long names
+            function adjustFontSize(element, maxWidth, baseFontSize) {
+                const text = element.textContent;
+                if (text.length > 20) { // Only adjust for names longer than 15 characters
+                    const scale = Math.max(0.6, 1 - (text.length - 15) * 0.03);
+                    const newFontSize = Math.max(baseFontSize * scale, 32);
+                    element.style.fontSize = newFontSize + 'px';
+                }
+            }
+            
+            function adjustAllFontSizes() {
+                // Adjust pitcher names
+                document.querySelectorAll('.pitcher-name').forEach(function(element) {
+                    adjustFontSize(element, 500, 44);
+                });
+                
+                // Adjust player names
+                document.querySelectorAll('.player-name').forEach(function(element) {
+                    adjustFontSize(element, 500, 44);
+                });
+            }
+            
+            // Also try on window load as backup
+            window.addEventListener('load', function() {
+                if (document.fonts.ready) {
+                    adjustAllFontSizes();
+                } else {
+                    setTimeout(adjustAllFontSizes, 500);
+                }
+            });
+        </script>
+    </head>
+    <body>
+
+
+        <div class="card">
+            <div class="top-section">
+                <div class="team">
+                    <div class="team-abbreviation away-team-colors">{{ away_team_abbrev }}</div>
+                    <div class="team-record away-team-record">{{ away_team_record }}</div>
+                </div>
+
+                <div class="vs">vs</div>
+                <!-- Temporarily commented out game info
+                <div class="game-info">
+                    <div>{{ game_date }}</div>
+                    <div>{{ game_time }}</div>
+                    <div>{{ game_venue }}</div>
+                    <div>{{ game_location }}</div>
+                </div>
+                -->
+
+                <div class="team">
+                    <div class="team-abbreviation home-team-colors">{{ home_team_abbrev }}</div>
+                    <div class="team-record home-team-record">{{ home_team_record }}</div>
+                </div>
+            </div>
+
+            <div class="pitcher-section">
+                <div class="away-pitcher">
+                    <div class="pitcher-box">
+                        <div class="pitcher-header">
+                            <span class="position-pitcher">{{ away_pitcher.position }}</span>
+                            <span class="pitcher-name">{{ away_pitcher.name }}</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                        </div>
+                        <div class="pitcher-stats">{{ away_pitcher.stats }}</div>
+                    </div>
+                </div>
+                
+                <div class="home-pitcher">
+                    <div class="pitcher-box">
+                        <div class="pitcher-header">
+                            <!-- <span class="symbol">🧊</span> -->
+                            <span class="pitcher-name">{{ home_pitcher.name }}</span>
+                            <span class="position-pitcher">{{ home_pitcher.position }}</span>
+                        </div>
+                        <div class="pitcher-stats">{{ home_pitcher.stats }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lineup-section">
+                <div class="away-lineup">
+                    {% for player in away_lineup %}
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <span class="position">{{ player.position }}</span>
+                            <span class="player-name {{ player.ops_trend }}" title="OPS Trend: {{ player.ops_trend }}">{{ player.name }}</span>
+                            <!-- <span class="symbol">🔥</span> -->
+                        </div>
+                        <div class="player-stats">{{ player.stats }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="home-lineup">
+                    {% for player in home_lineup %}
+                    <div class="lineup-box">
+                        <div class="lineup-header-row">
+                            <!-- <span class="symbol">🔥</span> -->
+                            <span class="player-name {{ player.ops_trend }}" title="OPS Trend: {{ player.ops_trend }}">{{ player.name }}</span>
+                            <span class="position">{{ player.position }}</span>
+                        </div>
+                        <div class="player-stats">{{ player.stats }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

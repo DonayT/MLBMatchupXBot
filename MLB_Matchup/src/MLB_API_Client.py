@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import get_address
 from lineup_validator import LineupValidator
+from players_previous_games import get_player_last_5_games, get_pitcher_last_3_games
 import re
 
 class MLBAPIClient: 
@@ -10,14 +11,29 @@ class MLBAPIClient:
         self.geolocator = None
         self.lineup_validator = LineupValidator()
 
+    """
+    params: date (str, optional) - Date in YYYY-MM-DD format, defaults to today
+    returns: list - List of games scheduled for the specified date
+    summary: Get MLB schedule for a specific date
+    """
     def get_schedule(self, date=None):
         if date is None: 
             date = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
         return statsapi.schedule(start_date = date, end_date = date)
 
+    """
+    params: game_id (int) - MLB game ID
+    returns: dict - Boxscore data for the specified game
+    summary: Retrieve boxscore data for a specific MLB game
+    """
     def get_boxscore(self, game_id):
         return statsapi.boxscore_data(game_id)
 
+    """
+    params: venue_id (int) - MLB venue ID
+    returns: dict or None - Venue information or None if not found
+    summary: Get venue data for a specific MLB venue
+    """
     def get_venue_data(self, venue_id):
         if not venue_id:
             return None
@@ -29,24 +45,25 @@ class MLBAPIClient:
             print(f"Error fetching venue data for venue_id {venue_id}: {e}")
             return None
 
+    """
+    params: None
+    returns: dict - Dictionary mapping team names to their W-L records
+    summary: Get current team records from MLB standings
+    """
     def get_team_records(self):
-        """Get current team records as a dictionary"""
         try:
             standings = statsapi.standings()
             team_records = {}
             
-            # Parse the standings string to extract team names and W-L records
             lines = standings.split('\n')
             
             for line in lines:
-                # Look for lines that contain team names and W-L records
                 match = re.search(r'\s+\d+\s+([A-Za-z\s\.]+)\s+(\d+)\s+(\d+)', line)
                 if match:
                     team_name = match.group(1).strip()
                     wins = int(match.group(2))
                     losses = int(match.group(3))
                     
-                    # Skip empty team names (parsing errors)
                     if team_name and len(team_name) > 2:
                         team_records[team_name] = {
                             'wins': wins,
@@ -60,11 +77,20 @@ class MLBAPIClient:
             print(f"Error getting team records: {e}")
             return {}
 
+    """
+    params: team_name (str) - Name of the team
+    returns: dict - Team record with wins, losses, and formatted record string
+    summary: Get record for a specific team
+    """
     def get_team_record(self, team_name):
-        """Get record for a specific team"""
         team_records = self.get_team_records()
         return team_records.get(team_name, {'wins': 0, 'losses': 0, 'record': '0-0'})
 
+    """
+    params: game_datetime (str) - ISO format datetime string, game_date (str) - Fallback date
+    returns: tuple - (formatted_date, formatted_time) in MM/DD/YYYY and I:M AM/PM ET format
+    summary: Format game datetime to Eastern Time and readable format
+    """
     def format_game_datetime(self, game_datetime, game_date):
         if game_datetime:
             try:
@@ -79,6 +105,11 @@ class MLBAPIClient:
         
         return game_date if game_date else 'TBD', 'TBD'
     
+    """
+    params: venue_name (str) - Name of the venue
+    returns: tuple - (city, state) extracted from venue name
+    summary: Extract city and state information from venue name
+    """
     def get_venue_location(self, venue_name):
         if venue_name == 'Unknown Venue':
             return 'Unknown City', 'Unknown State'
@@ -94,7 +125,12 @@ class MLBAPIClient:
             print(f"Error getting city/state for {venue_name}: {e}")
             return 'Unknown City', 'Unknown State'
     
-    def extract_lineup_data(self, boxscore, side):
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away'
+    returns: list - List of player dictionaries with basic lineup information
+    summary: Extract basic lineup data without player stats for incomplete lineups
+    """
+    def extract_lineup_data_basic(self, boxscore, side):
         batting_order = boxscore[side].get('battingOrder', [])
         players = boxscore[side].get('players', {})
         
@@ -104,15 +140,182 @@ class MLBAPIClient:
                 player = players.get(f"ID{pid}", {})
                 name = player.get('person', {}).get('fullName', 'Unknown')
                 position = player.get('position', {}).get('abbreviation', '')
+                
                 lineup.append({
                     'order': idx,
                     'name': name,
-                    'position': position
+                    'position': position,
+                    'recent_stats': "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
                 })
         
         return lineup
     
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away', team_id (int) - Team ID
+    returns: list - List containing player lineup data with recent stats
+    summary: Extract complete lineup data with recent performance statistics
+    """
+    def extract_lineup_data(self, boxscore, side, team_id=119):
+        batting_order = boxscore[side].get('battingOrder', [])
+        players = boxscore[side].get('players', {})
+        
+        lineup = []
+        if batting_order:
+            for idx, pid in enumerate(batting_order, 1):
+                player = players.get(f"ID{pid}", {})
+                name = player.get('person', {}).get('fullName', 'Unknown')
+                position = player.get('position', {}).get('abbreviation', '')
+                
+                # Remove accents from player names to avoid encoding issues
+                import unicodedata
+                name_normalized = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('ascii')
+                
+                # Initialize ops_trend with default value
+                ops_trend = 'neutral'
+                
+                try:
+
+
+                    
+                    # Get recent stats (last 5 games)
+                    recent_stats = get_player_last_5_games(name_normalized, team_id)
+                    if recent_stats and isinstance(recent_stats, dict):
+                        avg = recent_stats.get('avg', 0)
+                        ops = recent_stats.get('ops', 0)
+                        hits = recent_stats.get('hits', 0)
+                        rbi = recent_stats.get('rbi', 0)
+                        so = recent_stats.get('so', 0)
+                        games = recent_stats.get('games', 0)
+                        
+                        if games > 0:
+                            # Get season stats and calculate OPS trend (for backend analysis only)
+                            try:
+                                from get_stats import compare_ops_stats
+                                comparison = compare_ops_stats(name_normalized, team_id)
+                                
+                                if comparison and comparison.get('trend'):
+                                    ops_trend = comparison['trend']
+                                    season_ops = comparison.get('season_ops')
+                                    last_5_ops = comparison.get('last_5_games_ops')
+                                    
+                                    if season_ops is not None and last_5_ops is not None:
+                                        # Print debug info (but don't show in stats display)
+                                        print(f"🔥❄️ {name}: Season OPS {season_ops:.3f} vs Last 5 Games OPS {last_5_ops:.3f} = {ops_trend.upper()}")
+                                        
+                                        # Keep stats display clean and simple
+                                        stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                                    else:
+                                        stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                                else:
+                                    stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                            except Exception as e:
+                                print(f"⚠️ OPS trend calculation failed for {name}: {e}")
+                                stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
+                        else:
+                            # Show statline with 0's instead of "No recent data"
+                            stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
+                    else:
+                        # Show statline with 0's instead of "No recent data"
+                        stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
+                        print(f"⚠️ No stats for {name}")
+                except Exception as e:
+                    print(f"❌ Error getting stats for {name}: {e}")
+                    # Show statline with 0's instead of "No recent data"
+                    stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
+                
+                lineup.append({
+                    'order': idx,
+                    'name': name,
+                    'position': position,
+                    'recent_stats': stats_display,
+                    'stats': stats_display,
+                    'ops_trend': ops_trend
+                })
+        
+        return lineup
+    
+    """
+    params: boxscore (dict) - Game boxscore data
+    returns: bool - True if lineups are official, False otherwise
+    summary: Check if lineups for a game are official
+    """
     def are_lineups_official(self, boxscore):
         return self.lineup_validator.are_lineups_official(boxscore)
+    
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away', team_id (int) - Team ID
+    returns: list - List containing starting pitcher data with recent stats
+    summary: Extract starting pitcher data with recent performance statistics
+    """
+    def extract_pitcher_data(self, boxscore, side, team_id=119):
+        pitchers = boxscore[side].get('pitchers', [])
+        players = boxscore[side].get('players', {})
+        
+        if not pitchers:
+            return []
+        
+        pitcher_id = pitchers[0]
+        player = players.get(f"ID{pitcher_id}", {})
+        name = player.get('person', {}).get('fullName', 'Unknown')
+        position = player.get('position', {}).get('abbreviation', '')
+        
+        # Remove accents from pitcher names to avoid encoding issues
+        import unicodedata
+        name_normalized = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('ascii')
+        
+        try:
+            recent_stats = get_pitcher_last_3_games(name_normalized, team_id)
+            if recent_stats and isinstance(recent_stats, dict):
+                era = recent_stats.get('era', 0)
+                whip = recent_stats.get('whip', 0)
+                k = recent_stats.get('k', 0)
+                ip = recent_stats.get('ip', 0)
+                games = recent_stats.get('games', 0)
+                
+                if games > 0:
+                    stats_display = f"ERA: {era:.2f} WHIP: {whip:.2f} K: {k} IP: {ip}"
+                else:
+                    # Show statline with 0's instead of "No recent data"
+                    stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
+            else:
+                # Show statline with 0's instead of "No recent data"
+                stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
+        except Exception as e:
+            print(f"❌ Error getting pitcher stats for {name}: {e}")
+            # Show statline with 0's instead of "No recent data"
+            stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
+        
+        return [{
+            'name': name,
+            'position': position,
+            'recent_stats': stats_display,
+            'stats': stats_display  # Keep both for compatibility
+        }]
+    
+    """
+    params: boxscore (dict) - Game boxscore data, side (str) - 'home' or 'away'
+    returns: list - List containing basic starting pitcher data without stats
+    summary: Extract basic starting pitcher data for incomplete lineups
+    """
+    def extract_pitcher_data_basic(self, boxscore, side):
+        pitchers = boxscore[side].get('pitchers', [])
+        players = boxscore[side].get('players', {})
+        
+        if not pitchers:
+            return []
+        
+        pitcher_id = pitchers[0]
+        player = players.get(f"ID{pitcher_id}", {})
+        name = player.get('person', {}).get('fullName', 'Unknown')
+        position = player.get('position', {}).get('abbreviation', '')
+        
+        return [{
+            'name': name,
+            'position': position,
+            'recent_stats': "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0",
+            'stats': "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"  # Keep both for compatibility
+        }]
+    
+
         
         

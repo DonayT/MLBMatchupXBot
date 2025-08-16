@@ -162,6 +162,23 @@ def compare_ops_stats(player_name, team_id=119):
         try:
             from players_previous_games import get_player_last_5_games
             last_5_stats = get_player_last_5_games(player_name, team_id)
+            
+            # NEW LOGIC: Check if player has sufficient recent activity
+            if last_5_stats and last_5_stats.get('recent_activity') == 'insufficient':
+                games_with_pa = last_5_stats.get('games_with_pa_in_last_10', 0)
+                print(f"⚠️ {player_name}: Only {games_with_pa}/10 recent games with PAs - marking as neutral but showing stats")
+                # Return the OPS for display purposes, but mark trend as neutral
+                last_5_ops = last_5_stats['ops']
+                return {
+                    "player_name": player_name,
+                    "season_ops": season_ops,
+                    "last_5_games_ops": last_5_ops,
+                    "ops_difference": None,  # Can't calculate difference due to insufficient data
+                    "trend": "neutral",
+                    "reason": "insufficient_recent_activity",
+                    "games_with_pa_in_last_10": games_with_pa
+                }
+            
             last_5_ops = last_5_stats['ops'] if last_5_stats else None
         except Exception as e:
             print(f"Error getting last 5 games stats: {e}")
@@ -233,10 +250,18 @@ def get_lineup_ops_summary(lineup_data, team_id=119):
     for player_name, comparison in lineup_comparison.items():
         if comparison['trend'] == 'hot':
             hot_players.append(player_name)
+            print(f"🔥 {player_name}: HOT trend")
         elif comparison['trend'] == 'cold':
             cold_players.append(player_name)
+            print(f"❄️ {player_name}: COLD trend")
         else:
             neutral_players.append(player_name)
+            reason = comparison.get('reason', 'no_trend')
+            if reason == 'insufficient_recent_activity':
+                games_with_pa = comparison.get('games_with_pa_in_last_10', 0)
+                print(f"⚪ {player_name}: NEUTRAL (only {games_with_pa}/10 recent games with PAs)")
+            else:
+                print(f"⚪ {player_name}: NEUTRAL (no significant trend)")
         
         # Sum up OPS values for averages
         if comparison['season_ops'] is not None and comparison['last_5_games_ops'] is not None:

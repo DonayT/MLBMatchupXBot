@@ -145,7 +145,7 @@ class MLBAPIClient:
                     'order': idx,
                     'name': name,
                     'position': position,
-                    'recent_stats': "No recent data"
+                    'recent_stats': "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
                 })
         
         return lineup
@@ -212,13 +212,16 @@ class MLBAPIClient:
                                 print(f"⚠️ OPS trend calculation failed for {name}: {e}")
                                 stats_display = f"AVG: {avg:.3f} / OPS: {ops:.3f} / H: {hits} / RBIs: {rbi} / SO: {so}"
                         else:
-                            stats_display = "No recent data"
+                            # Show statline with 0's instead of "No recent data"
+                            stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
                     else:
-                        stats_display = "No recent data"
+                        # Show statline with 0's instead of "No recent data"
+                        stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
                         print(f"⚠️ No stats for {name}")
                 except Exception as e:
                     print(f"❌ Error getting stats for {name}: {e}")
-                    stats_display = "No recent data"
+                    # Show statline with 0's instead of "No recent data"
+                    stats_display = "AVG: 0.000 / OPS: 0.000 / H: 0 / RBIs: 0 / SO: 0"
                 
                 lineup.append({
                     'order': idx,
@@ -272,12 +275,15 @@ class MLBAPIClient:
                 if games > 0:
                     stats_display = f"ERA: {era:.2f} WHIP: {whip:.2f} K: {k} IP: {ip}"
                 else:
-                    stats_display = "No recent data"
+                    # Show statline with 0's instead of "No recent data"
+                    stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
             else:
-                stats_display = "No recent data"
+                # Show statline with 0's instead of "No recent data"
+                stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
         except Exception as e:
             print(f"❌ Error getting pitcher stats for {name}: {e}")
-            stats_display = "No recent data"
+            # Show statline with 0's instead of "No recent data"
+            stats_display = "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"
         
         return [{
             'name': name,
@@ -306,8 +312,8 @@ class MLBAPIClient:
         return [{
             'name': name,
             'position': position,
-            'recent_stats': "No recent data",
-            'stats': "No recent data"  # Keep both for compatibility
+            'recent_stats': "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0",
+            'stats': "ERA: 0.00 WHIP: 0.00 K: 0 IP: 0.0"  # Keep both for compatibility
         }]
     
 

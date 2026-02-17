@@ -3,11 +3,15 @@ import statsapi
 import os
 import sys
 
+# Add utils directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+
 from game_data_processor import GameDataProcessor
 from game_queue import GameQueue
 from date_organizer import check_date_transition, organize_existing_images
 from jinja2_image_generator import Jinja2ImageGenerator
 from get_stats import clear_stats_cache
+from api_cache import get_cache
 
 # Add Xbot directory to path for x_uploader import
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'Xbot'))
@@ -44,11 +48,16 @@ class MLBMatchup:
         if len(unprocessed_games) == 0:
             print("All games for today have been processed!")
             print("No more games to check - all lineups are complete!")
-            
+
             print("Clearing stats cache for fresh data tomorrow...")
             clear_stats_cache()
             print("Stats cache cleared successfully!")
-            
+
+            print("Clearing API cache for fresh data tomorrow...")
+            cache = get_cache()
+            cache.clear()
+            print("API cache cleared successfully!")
+
             return "ALL_DONE"
         
         for game in unprocessed_games:
@@ -72,9 +81,18 @@ class MLBMatchup:
                     print(f"   Error creating image: {e}")
             else:
                 print("   Waiting for lineups to become official...")
-            
+
             print()
-    
+
+        # Show cache statistics to demonstrate optimization effectiveness
+        cache = get_cache()
+        cache_stats = cache.get_cache_stats()
+        print("\n📊 API Cache Statistics:")
+        print(f"   Player IDs cached: {cache_stats['player_ids_cached']}")
+        print(f"   Boxscores cached: {cache_stats['boxscores_cached']}")
+        print(f"   Schedules cached: {cache_stats['schedules_cached']}")
+        print(f"   💡 Optimization: Avoided {cache_stats['player_ids_cached']} player lookups, {cache_stats['schedules_cached']} schedule fetches!\n")
+
         return "CONTINUE"
     
     def create_lineup_image_with_jinja2(self, game_data):

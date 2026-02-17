@@ -1,15 +1,24 @@
 import statsapi
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import get_address
+import sys
+import os
+
+# Add utils directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+
+from get_address import get_city_state
 from lineup_validator import LineupValidator
 from players_previous_games import get_player_last_5_games, get_pitcher_last_3_games
+from api_cache import get_cache
 import re
 
-class MLBAPIClient: 
+class MLBAPIClient:
     def __init__ (self):
         self.geolocator = None
         self.lineup_validator = LineupValidator()
+        self.cache = get_cache()
+        self._team_schedule_cache = {}  # Session cache for team schedules
 
     """
     params: date (str, optional) - Date in YYYY-MM-DD format, defaults to today
@@ -28,6 +37,34 @@ class MLBAPIClient:
     """
     def get_boxscore(self, game_id):
         return statsapi.boxscore_data(game_id)
+
+    """
+    params: team_id (int) - Team ID, season (int) - Season year
+    returns: list - Team schedule for the season up to yesterday
+    summary: Get team schedule once and cache it to avoid redundant API calls
+    """
+    def get_team_schedule_for_stats(self, team_id, season=None):
+        if season is None:
+            season = datetime.now().year
+
+        cache_key = f"{team_id}_{season}"
+
+        # Check session cache first
+        if cache_key in self._team_schedule_cache:
+            return self._team_schedule_cache[cache_key]
+
+        # Fetch from API cache (which handles the actual API call)
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        schedule = self.cache.get_team_schedule(
+            team_id=team_id,
+            season=season,
+            start_date=f'{season}-01-01',
+            end_date=yesterday
+        )
+
+        # Store in session cache
+        self._team_schedule_cache[cache_key] = schedule
+        return schedule
 
     """
     params: venue_id (int) - MLB venue ID
@@ -113,9 +150,9 @@ class MLBAPIClient:
     def get_venue_location(self, venue_name):
         if venue_name == 'Unknown Venue':
             return 'Unknown City', 'Unknown State'
-        
+
         try:
-            city_state = get_address.get_city_state(venue_name)
+            city_state = get_city_state(venue_name)
             if city_state:
                 city, state = city_state.split(', ')
                 return city, state
@@ -158,7 +195,10 @@ class MLBAPIClient:
     def extract_lineup_data(self, boxscore, side, team_id=119):
         batting_order = boxscore[side].get('battingOrder', [])
         players = boxscore[side].get('players', {})
-        
+
+        # Fetch team schedule ONCE for all players on this team
+        team_schedule = self.get_team_schedule_for_stats(team_id)
+
         lineup = []
         if batting_order:
             for idx, pid in enumerate(batting_order, 1):
@@ -176,9 +216,9 @@ class MLBAPIClient:
                 try:
 
 
-                    
-                    # Get recent stats (last 5 games)
-                    recent_stats = get_player_last_5_games(name_normalized, team_id)
+
+                    # Get recent stats (last 5 games) - pass pre-fetched schedule
+                    recent_stats = get_player_last_5_games(name_normalized, team_id, team_schedule=team_schedule)
                     if recent_stats and isinstance(recent_stats, dict):
                         avg = recent_stats.get('avg', 0)
                         ops = recent_stats.get('ops', 0)
@@ -191,7 +231,8 @@ class MLBAPIClient:
                             # Get season stats and calculate OPS trend (for backend analysis only)
                             try:
                                 from get_stats import compare_ops_stats
-                                comparison = compare_ops_stats(name_normalized, team_id)
+                                # Pass pre-fetched schedule to avoid redundant API calls
+                                comparison = compare_ops_stats(name_normalized, team_id, team_schedule=team_schedule)
                                 
                                 if comparison and comparison.get('trend'):
                                     ops_trend = comparison['trend']
@@ -250,21 +291,25 @@ class MLBAPIClient:
     def extract_pitcher_data(self, boxscore, side, team_id=119):
         pitchers = boxscore[side].get('pitchers', [])
         players = boxscore[side].get('players', {})
-        
+
         if not pitchers:
             return []
-        
+
+        # Fetch team schedule ONCE for the pitcher
+        team_schedule = self.get_team_schedule_for_stats(team_id)
+
         pitcher_id = pitchers[0]
         player = players.get(f"ID{pitcher_id}", {})
         name = player.get('person', {}).get('fullName', 'Unknown')
         position = player.get('position', {}).get('abbreviation', '')
-        
+
         # Remove accents from pitcher names to avoid encoding issues
         import unicodedata
         name_normalized = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode('ascii')
-        
+
         try:
-            recent_stats = get_pitcher_last_3_games(name_normalized, team_id)
+            # Pass pre-fetched schedule to avoid redundant API calls
+            recent_stats = get_pitcher_last_3_games(name_normalized, team_id, team_schedule=team_schedule)
             if recent_stats and isinstance(recent_stats, dict):
                 era = recent_stats.get('era', 0)
                 whip = recent_stats.get('whip', 0)

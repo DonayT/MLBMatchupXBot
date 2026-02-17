@@ -136,19 +136,20 @@ def get_cached_stats():
         'pybaseball_available': PYBASEBALL_AVAILABLE
     }
 
-def compare_ops_stats(player_name, team_id=119):
+def compare_ops_stats(player_name, team_id=119, team_schedule=None):
     """
     Compare season OPS (from pybaseball) vs last 5 games OPS (from statsapi)
-    
+
     params: player_name (str) - Player name to compare
             team_id (int) - Team ID for statsapi lookup
+            team_schedule (list, optional) - Pre-fetched team schedule to avoid redundant API calls
     returns: dict - Comparison data with both OPS values and difference
     """
     try:
         # Get season OPS from pybaseball cache
         season_stats = get_player_stats(player_name, is_pitcher=False)
         season_ops = None
-        
+
         # Extract OPS from the stats string (format: ".315 25 HR 89 RBI 0.847 OPS")
         if season_stats and "OPS" in season_stats:
             try:
@@ -157,11 +158,11 @@ def compare_ops_stats(player_name, team_id=119):
                 season_ops = float(ops_part.split()[-1])
             except (ValueError, IndexError):
                 season_ops = None
-        
-        # Get last 5 games OPS from statsapi
+
+        # Get last 5 games OPS from statsapi - pass pre-fetched schedule
         try:
             from players_previous_games import get_player_last_5_games
-            last_5_stats = get_player_last_5_games(player_name, team_id)
+            last_5_stats = get_player_last_5_games(player_name, team_id, team_schedule=team_schedule)
             
             # NEW LOGIC: Check if player has sufficient recent activity
             if last_5_stats and last_5_stats.get('recent_activity') == 'insufficient':

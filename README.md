@@ -38,7 +38,7 @@ An automated X (Twitter) bot that posts daily Major League Baseball (MLB) lineup
 ```
 MLBMatchupXBot/
 ├── MLB_Matchup/
-│   ├── src/
+│   ├── src/                           # Core application code
 │   │   ├── Main.py                    # Main orchestrator and entry point
 │   │   ├── MLBMatchup.py              # Core workflow orchestrator
 │   │   ├── game_data_processor.py     # Game data extraction and processing
@@ -49,10 +49,21 @@ MLBMatchupXBot/
 │   │   ├── twitter_image_generator.py # Legacy image generation (deprecated)
 │   │   ├── MLB_API_Client.py          # MLB API integration and data fetching
 │   │   ├── get_stats.py               # Player statistics and team records
-│   │   ├── players_previous_games.py  # Player performance history
+│   │   └── players_previous_games.py  # Player performance history
+│   ├── utils/                         # Utility modules (NEW - v2.1)
+│   │   ├── api_cache.py               # API caching system (NEW - v2.1)
 │   │   ├── date_organizer.py          # Date/file organization and management
 │   │   ├── lineup_validator.py        # Lineup validation and verification
 │   │   └── get_address.py             # Venue and location information
+│   ├── test/                          # Test suite (REORGANIZED - v2.1)
+│   │   ├── test_api_optimization.py   # Cache optimization tests (NEW)
+│   │   ├── test_historical_date.py    # Historical game tests (NEW)
+│   │   ├── test_get_stats.py          # Stats module tests
+│   │   ├── test_image_generator.py    # Image generation tests
+│   │   └── test_real_game_image.py    # Real game integration tests
+│   ├── docs/                          # Documentation (NEW - v2.1)
+│   │   ├── API_OPTIMIZATION_SUMMARY.md # v2.1 optimization details
+│   │   └── PROJECT_ORGANIZATION.md    # Project structure guide
 │   ├── config/
 │   │   ├── mock_game_data.py          # Test data for development
 │   │   ├── teamPrimaryColors.json     # Team primary color schemes
@@ -71,7 +82,6 @@ MLBMatchupXBot/
 │   ├── x_uploader.py                  # Twitter image upload functionality
 │   ├── bot.py                         # Twitter API integration
 │   └── connectionCheck.py             # Connection verification utility
-├── test/                              # Test suite and test images
 └── requirements.txt                    # Python dependencies
 ```
 

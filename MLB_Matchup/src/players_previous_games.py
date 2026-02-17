@@ -1,31 +1,43 @@
 
 import statsapi
 from datetime import datetime, timedelta
+import sys
+import os
+
+# Add utils directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+
+from api_cache import get_cache
 
 """
 params: player_name (str) - Full name of the player (e.g., 'Shohei Ohtani')
         team_id (int) - Team ID (default 119 for Dodgers)
         season (int) - Season year (default 2025)
+        team_schedule (list, optional) - Pre-fetched team schedule to avoid redundant API calls
 returns: dict - Player's last 5 games statline with keys: avg, hits, rbi, games, obp, slg, so
 summary: Get the last 5 completed games stats for a player including OPS components
 """
-def get_player_last_5_games(player_name, team_id=119, season=2025):
-    player_lookup = statsapi.lookup_player(player_name)
-    if not player_lookup:
+def get_player_last_5_games(player_name, team_id=119, season=2025, team_schedule=None):
+    cache = get_cache()
+
+    # Use cache for player lookup
+    player_id_num = cache.get_player_id(player_name)
+    if not player_id_num:
         print(f"Could not find player: {player_name}")
         return None
-    
-    player_id = f"ID{player_lookup[0]['id']}"
+
+    player_id = f"ID{player_id_num}"
     print(f"Found {player_name} - ID: {player_id}")
-    
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    
-    team_schedule = statsapi.schedule(
-        team = team_id,
-        season = season,
-        start_date = f'{season}-01-01',
-        end_date = yesterday
-    )
+
+    # Use pre-fetched schedule if provided, otherwise fetch it
+    if team_schedule is None:
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        team_schedule = cache.get_team_schedule(
+            team_id=team_id,
+            season=season,
+            start_date=f'{season}-01-01',
+            end_date=yesterday
+        )
     
     # NEW LOGIC: Look at last 10 games instead of entire season
     last_10_games = team_schedule[-10:] if len(team_schedule) >= 10 else team_schedule
@@ -37,9 +49,12 @@ def get_player_last_5_games(player_name, team_id=119, season=2025):
     # First pass: Check all 10 games to see how many the player appeared in
     for game in last_10_games:
         game_id = game['game_id']
-        
+
         try:
-            boxscore = statsapi.boxscore_data(game_id)
+            # Use cache for boxscore data
+            boxscore = cache.get_boxscore(game_id)
+            if not boxscore:
+                continue
             
             home_players = boxscore['home']['players']
             away_players = boxscore['away']['players']
@@ -194,34 +209,42 @@ def get_lineup_last_5_games(lineup_data, team_id=119):
 params: player_name (str) - Full name of the pitcher (e.g., 'Logan Gilbert')
         team_id (int) - Team ID (default 119 for Dodgers)
         season (int) - Season year (default 2025)
+        team_schedule (list, optional) - Pre-fetched team schedule to avoid redundant API calls
 returns: dict - Pitcher's last 3 games statline with keys: era, whip, k, ip, games
 summary: Get the last 3 completed games stats for a pitcher
 """
-def get_pitcher_last_3_games(player_name, team_id=119, season=2025):
-    player_lookup = statsapi.lookup_player(player_name)
-    if not player_lookup:
+def get_pitcher_last_3_games(player_name, team_id=119, season=2025, team_schedule=None):
+    cache = get_cache()
+
+    # Use cache for player lookup
+    player_id_num = cache.get_player_id(player_name)
+    if not player_id_num:
         print(f"Could not find pitcher: {player_name}")
         return None
-    
-    player_id = f"ID{player_lookup[0]['id']}"
+
+    player_id = f"ID{player_id_num}"
     print(f"Found pitcher {player_name} - ID: {player_id}")
-    
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    
-    team_schedule = statsapi.schedule(
-        team = team_id,
-        season = season,
-        start_date = f'{season}-01-01',
-        end_date = yesterday
-    )
+
+    # Use pre-fetched schedule if provided, otherwise fetch it
+    if team_schedule is None:
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        team_schedule = cache.get_team_schedule(
+            team_id=team_id,
+            season=season,
+            start_date=f'{season}-01-01',
+            end_date=yesterday
+        )
     
     last_3_games = []
     
     for game in reversed(team_schedule):
         game_id = game['game_id']
-        
+
         try:
-            boxscore = statsapi.boxscore_data(game_id)
+            # Use cache for boxscore data
+            boxscore = cache.get_boxscore(game_id)
+            if not boxscore:
+                continue
             
             home_players = boxscore['home']['players']
             away_players = boxscore['away']['players']

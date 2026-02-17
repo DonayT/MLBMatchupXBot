@@ -1,5 +1,11 @@
 import os
 import json
+import sys
+
+# Add src directory to path for MLB_API_Client
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+
 from jinja2 import Template
 from MLB_API_Client import MLBAPIClient
 import get_address

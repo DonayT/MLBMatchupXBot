@@ -3,8 +3,9 @@ import statsapi
 import os
 import sys
 
-# Add utils directory to path
+# Add utils and image_generation directories to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'image_generation'))
 
 from game_data_processor import GameDataProcessor
 from game_queue import GameQueue

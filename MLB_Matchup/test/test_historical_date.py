@@ -9,9 +9,10 @@ import time
 import os
 import sys
 
-# Add src and utils directories to path
+# Add src, utils, and image_generation directories to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'image_generation'))
 
 from MLB_API_Client import MLBAPIClient
 from game_data_processor import GameDataProcessor

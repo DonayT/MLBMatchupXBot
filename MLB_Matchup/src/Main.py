@@ -15,12 +15,12 @@ def MainCommand():
     try:
         orchestrator = MLBMatchup()
         result = orchestrator.process_games()
-        
+
         if result == "ALL_DONE":
             return 0
         else:
             return 0
-            
+
     except Exception as e:
         print(f"Error in main execution: {e}")
         return 1

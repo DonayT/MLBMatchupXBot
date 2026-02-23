@@ -1,6 +1,9 @@
 import os
 import json
 import sys
+import urllib.request
+import base64
+from concurrent.futures import ThreadPoolExecutor
 
 # Add src directory to path for MLB_API_Client
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -80,6 +83,44 @@ class Jinja2ImageGenerator:
             print(f"Error loading WorkSans-Bold font: {e}")
             return ""
     
+    def build_headshot_url(self, player_id):
+        """Build MLB official headshot URL for a player ID"""
+        if not player_id:
+            return ""
+        return (
+            f"https://img.mlbstatic.com/mlb-photos/image/upload/"
+            f"d_people:generic:headshot:67:current.png/w_180,q_auto:best/"
+            f"v1/people/{player_id}/headshot/67/current"
+        )
+
+    def fetch_headshot_b64(self, player_id):
+        """Download a player headshot and return it as a base64 data URI.
+        Playwright blocks external URLs when rendering via set_content(),
+        so images must be embedded directly in the HTML."""
+        if not player_id:
+            return ""
+        url = self.build_headshot_url(player_id)
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=8) as response:
+                image_data = response.read()
+                content_type = response.headers.get('Content-Type', 'image/png').split(';')[0]
+                b64 = base64.b64encode(image_data).decode('utf-8')
+                return f"data:{content_type};base64,{b64}"
+        except Exception as e:
+            print(f"Could not load headshot for player {player_id}: {e}")
+            return ""
+
+    def fetch_headshots_parallel(self, player_ids):
+        """Fetch multiple headshots concurrently. Returns {player_id: data_uri}."""
+        unique_ids = list({pid for pid in player_ids if pid})
+        if not unique_ids:
+            return {}
+        print(f"Fetching {len(unique_ids)} player headshots...")
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            results = list(executor.map(self.fetch_headshot_b64, unique_ids))
+        return dict(zip(unique_ids, results))
+
     def get_team_abbreviation(self, team_name):
         """Get team abbreviation from full team name"""
         return self.team_abbreviations.get(team_name, team_name[:3].upper())
@@ -148,26 +189,39 @@ class Jinja2ImageGenerator:
             home_primary_color = team_primary_colors.get(home_team, '#002D72')
             home_secondary_color = team_secondary_colors.get(home_team, '#FF5910')
             
-            # Prepare pitcher data
-            away_pitcher = {
-                'name': game_data.get('away_pitcher', {}).get('name', 'TBD'),
-                'position': game_data.get('away_pitcher', {}).get('position', 'P'),
-                'stats': self.format_pitcher_stats(game_data.get('away_pitcher', {}).get('stats', 'No recent data'))
-            }
-            
-            home_pitcher = {
-                'name': game_data.get('home_pitcher', {}).get('name', 'TBD'),
-                'position': game_data.get('home_pitcher', {}).get('position', 'P'),
-                'stats': self.format_pitcher_stats(game_data.get('home_pitcher', {}).get('stats', 'No recent data'))
-            }
-            
-            # Prepare lineup data with batch OPS trend lookup
+            # Get raw pitcher and lineup data
+            away_pitcher_raw = game_data.get('away_pitcher', {})
+            away_pitcher_id = away_pitcher_raw.get('player_id')
+            home_pitcher_raw = game_data.get('home_pitcher', {})
+            home_pitcher_id = home_pitcher_raw.get('player_id')
             away_players = game_data.get('away_lineup', [])
             home_players = game_data.get('home_lineup', [])
-            
-            # Get OPS trends for all players at once (avoids duplicate API calls)
-            away_lineup = self.process_lineup_single_pass(away_players, game_data.get('away_team', ''))
-            home_lineup = self.process_lineup_single_pass(home_players, game_data.get('home_team', ''))
+
+            # Collect all player IDs and fetch headshots in parallel (base64 so
+            # Playwright can embed them without making external network requests)
+            all_ids = ([p.get('player_id') for p in away_players + home_players]
+                       + [away_pitcher_id, home_pitcher_id])
+            headshot_map = self.fetch_headshots_parallel(all_ids)
+
+            # Build pitcher dicts
+            away_pitcher = {
+                'name': away_pitcher_raw.get('name', 'TBD'),
+                'position': away_pitcher_raw.get('position', 'P'),
+                'stats': self.format_pitcher_stats(away_pitcher_raw.get('stats', 'No recent data')),
+                'player_id': away_pitcher_id,
+                'headshot_b64': headshot_map.get(away_pitcher_id, '')
+            }
+            home_pitcher = {
+                'name': home_pitcher_raw.get('name', 'TBD'),
+                'position': home_pitcher_raw.get('position', 'P'),
+                'stats': self.format_pitcher_stats(home_pitcher_raw.get('stats', 'No recent data')),
+                'player_id': home_pitcher_id,
+                'headshot_b64': headshot_map.get(home_pitcher_id, '')
+            }
+
+            # Process lineups, passing the pre-fetched headshot map
+            away_lineup = self.process_lineup_single_pass(away_players, game_data.get('away_team', ''), headshot_map)
+            home_lineup = self.process_lineup_single_pass(home_players, game_data.get('home_team', ''), headshot_map)
             
             # Return template data
             return {
@@ -241,30 +295,36 @@ class Jinja2ImageGenerator:
         
         return team_id
     
-    def process_lineup_single_pass(self, players, team_name):
+    def process_lineup_single_pass(self, players, team_name, headshot_map=None):
         """Process entire lineup in a single pass - with OPS trends for color coding"""
         try:
             if not players:
                 return []
-            
+
+            if headshot_map is None:
+                headshot_map = {}
+
             processed_lineup = []
-            
+
             # Process each player exactly once - get OPS trend for color coding
             for player in players:
                 player_name = player.get('name', 'TBD')
                 position = player.get('position', '')
                 stats = self.format_player_stats(player.get('stats', 'No recent data'))
                 ops_trend = player.get('ops_trend', 'neutral')
-                
+                player_id = player.get('player_id')
+
                 # Debug: Print the ops_trend values being processed
                 print(f"🔍 DEBUG - Player: {player_name}, OPS Trend: '{ops_trend}' (type: {type(ops_trend)})")
-                
+
                 # Add player to lineup with OPS trend for color coding
                 processed_lineup.append({
                     'name': player_name,
                     'position': position,
                     'stats': stats,
-                    'ops_trend': ops_trend
+                    'ops_trend': ops_trend,
+                    'player_id': player_id,
+                    'headshot_b64': headshot_map.get(player_id, '')
                 })
             
             return processed_lineup
@@ -298,7 +358,7 @@ class Jinja2ImageGenerator:
                 return False
             
             # Get template path
-            template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'image_generator_v2.html')
+            template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'image_generator_v3.html')
             
             # Render template
             rendered_html = self.render_template(template_path, template_data)

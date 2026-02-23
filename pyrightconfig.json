@@ -1,0 +1,19 @@
+{
+    "pythonVersion": "3.11",
+    "include": [
+        "MLB_Matchup"
+    ],
+    "extraPaths": [
+        "MLB_Matchup/src",
+        "MLB_Matchup/utils",
+        "MLB_Matchup/image_generation",
+        "MLB_Matchup/config",
+        "MLB_Matchup/test",
+        "Xbot"
+    ],
+    "reportMissingImports": false,
+    "reportMissingModuleSource": false,
+    "reportMissingModuleSourceFiles": false,
+    "reportUnknownVariableType": false,
+    "reportUnknownMemberType": false
+}

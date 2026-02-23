@@ -25,12 +25,12 @@ class MLBMatchup:
         self.jinja2_generator = Jinja2ImageGenerator()
 
     """
-    params: None
+    params: date (str, optional) - Date in YYYY-MM-DD format. Defaults to today.
     returns: str - "ALL_DONE" if all games processed, "CONTINUE" if more games remain
     summary: Main workflow that processes MLB games, creates lineup images, and uploads to Twitter
     """
-    def process_games(self):
-        today = datetime.now().strftime('%Y-%m-%d')
+    def process_games(self, date=None):
+        today = date if date else datetime.now().strftime('%Y-%m-%d')
         
         print("Checking date organization...")
         date_changed = check_date_transition()
@@ -149,17 +149,19 @@ class MLBMatchup:
                 formatted_away_lineup.append({
                     'name': player.get('name', 'TBD'),
                     'position': player.get('position', ''),
-                    'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
-                    'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
+                    'stats': player.get('recent_stats', 'No recent data'),
+                    'ops_trend': player.get('ops_trend', 'neutral'),
+                    'player_id': player.get('player_id')
                 })
-            
+
             formatted_home_lineup = []
             for player in game_data['home_lineup']:
                 formatted_home_lineup.append({
                     'name': player.get('name', 'TBD'),
                     'position': player.get('position', ''),
-                    'stats': player.get('recent_stats', 'No recent data'),  # Map recent_stats to stats
-                    'ops_trend': player.get('ops_trend', 'neutral')  # Preserve OPS trend for color coding
+                    'stats': player.get('recent_stats', 'No recent data'),
+                    'ops_trend': player.get('ops_trend', 'neutral'),
+                    'player_id': player.get('player_id')
                 })
             
             formatted_game_data = {
@@ -173,12 +175,14 @@ class MLBMatchup:
                 'away_pitcher': {
                     'name': game_data['away_pitcher'] if game_data['away_pitcher'] != 'TBD' else 'TBD',
                     'position': 'P',
-                    'stats': game_data['away_pitchers'][0].get('recent_stats', 'No recent data') if game_data['away_pitchers'] else 'No recent data'
+                    'stats': game_data['away_pitchers'][0].get('recent_stats', 'No recent data') if game_data['away_pitchers'] else 'No recent data',
+                    'player_id': game_data['away_pitchers'][0].get('player_id') if game_data['away_pitchers'] else None
                 },
                 'home_pitcher': {
                     'name': game_data['home_pitcher'] if game_data['home_pitcher'] != 'TBD' else 'TBD',
                     'position': 'P',
-                    'stats': game_data['home_pitchers'][0].get('recent_stats', 'No recent data') if game_data['home_pitchers'] else 'No recent data'
+                    'stats': game_data['home_pitchers'][0].get('recent_stats', 'No recent data') if game_data['home_pitchers'] else 'No recent data',
+                    'player_id': game_data['home_pitchers'][0].get('player_id') if game_data['home_pitchers'] else None
                 }
             }
             

@@ -267,6 +267,7 @@ class MLBAPIClient:
                 lineup.append({
                     'order': idx,
                     'name': name,
+                    'player_id': pid,
                     'position': position,
                     'recent_stats': stats_display,
                     'stats': stats_display,
@@ -332,6 +333,7 @@ class MLBAPIClient:
         
         return [{
             'name': name,
+            'player_id': pitcher_id,
             'position': position,
             'recent_stats': stats_display,
             'stats': stats_display  # Keep both for compatibility

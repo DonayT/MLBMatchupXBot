@@ -33,8 +33,8 @@ def generate_preview():
     # Prepare template data
     template_data = generator.prepare_template_data(SAMPLE_DATA)
 
-    # Render template
-    template_path = os.path.join(os.path.dirname(__file__), 'image_generator_v2.html')
+    # Render template  (swap v2 <-> v3 to preview either version)
+    template_path = os.path.join(os.path.dirname(__file__), 'image_generator_v3.html')
     html_content = generator.render_template(template_path, template_data)
 
     # Save to file

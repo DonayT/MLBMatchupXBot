@@ -135,33 +135,18 @@
         }
 
         /* ─────────────────────────────────────
-           GRADIENT DIVIDER between top & lineup
-        ───────────────────────────────────── */
-        .top-divider {
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(
-                90deg,
-                var(--away-primary) 0%,
-                #cccccc 50%,
-                var(--home-primary) 100%
-            );
-        }
-
-        /* ─────────────────────────────────────
            LINEUP SECTION
         ───────────────────────────────────── */
         .lineup-section {
             display: flex;
             width: 100%;
-            height: 1116px;    /* 1400 - 280 top - 4 divider */
+            height: 1120px;    /* 1400 - 280 top */
         }
 
         .away-column {
             width: 580px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #e8e8e8;
         }
 
         .home-column {
@@ -178,13 +163,7 @@
         }
 
         .center-gap::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 8px;
-            bottom: 8px;
-            width: 1px;
-            background: #e8e8e8;
+            content: none;
         }
 
         /* ─────────────────────────────────────
@@ -193,36 +172,28 @@
         .pitcher-row {
             display: flex;
             align-items: center;
-            height: 106px;
+            height: 86px;
+            margin: 10px 0;
             padding: 0 18px;
-            background: #f4f4f4;
-            border-bottom: 2px solid #ddd;
+            background: #ffffff;
+            border: 2px solid #222;
+            border-radius: 50px;
             flex-shrink: 0;
         }
 
-        .away-column .pitcher-row { flex-direction: row; }
-        .home-column .pitcher-row { flex-direction: row-reverse; }
+        /* outer edge has 12px margin so the curved pill end stays visible;
+           inner edge is flush (no margin); padding adjusted to keep badge/headshot alignment */
+        .away-column .pitcher-row { flex-direction: row; margin-left: 12px; padding-left: 40px; padding-right: 16px; }
+        .home-column .pitcher-row { flex-direction: row-reverse; margin-right: 12px; padding-right: 40px; padding-left: 16px; }
 
         .pitcher-badge {
-            font-family: 'WorkSans-Bold', sans-serif;
+             font-family: 'WorkSans-Bold', sans-serif;
             font-size: 22px;
             font-weight: bold;
             color: #111;
             flex-shrink: 0;
             width: 36px;
             text-align: center;
-        }
-
-        .away-badge {
-            background: var(--away-primary);
-            color: var(--away-secondary);
-            -webkit-text-stroke: 0;
-        }
-
-        .home-badge {
-            background: var(--home-primary);
-            color: var(--home-secondary);
-            -webkit-text-stroke: 0;
         }
 
         .pitcher-info {
@@ -245,8 +216,8 @@
         }
 
         .pitcher-headshot-wrap {
-            width: 70px;
-            height: 70px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             overflow: hidden;
             flex-shrink: 0;
@@ -294,7 +265,6 @@
             align-items: center;
             height: 112px;
             padding: 0 18px;
-            border-bottom: 1px solid #f0f0f0;
             flex-shrink: 0;
         }
 
@@ -303,7 +273,7 @@
 
         /* alternating rows */
         .away-column  .player-row:nth-child(even),
-        .home-column  .player-row:nth-child(even)  { background: #fafafa; }
+        .home-column  .player-row:nth-child(even)  { background: #ffffff; }
         .away-column  .player-row:nth-child(odd),
         .home-column  .player-row:nth-child(odd)   { background: #ffffff; }
 
@@ -433,9 +403,6 @@
             <div class="team-record">0-0</div>
         </div>
     </div>
-
-    <!-- ── GRADIENT DIVIDER ── -->
-    <div class="top-divider"></div>
 
     <!-- ── LINEUP SECTION ── -->
     <div class="lineup-section">

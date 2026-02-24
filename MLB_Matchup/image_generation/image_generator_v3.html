@@ -204,17 +204,13 @@
         .home-column .pitcher-row { flex-direction: row-reverse; }
 
         .pitcher-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
             font-family: 'WorkSans-Bold', sans-serif;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
+            color: #111;
             flex-shrink: 0;
-            letter-spacing: 0;
+            width: 36px;
+            text-align: center;
         }
 
         .away-badge {
@@ -325,17 +321,13 @@
         .home-column .order-num { margin-left: 10px; }
 
         .pos-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 6px;
             font-family: 'WorkSans-Bold', sans-serif;
-            font-size: 16px;
+            font-size: 22px;
             font-weight: bold;
+            color: #111;
             flex-shrink: 0;
-            letter-spacing: 0;
+            width: 36px;
+            text-align: center;
         }
 
         .player-info {
@@ -453,7 +445,7 @@
 
             <!-- Pitcher -->
             <div class="pitcher-row">
-                <div class="pitcher-badge away-badge">P</div>
+                <div class="pitcher-badge">P</div>
                 <div class="pitcher-info">
                     <div class="pitcher-name-text">{{ away_pitcher.name }}</div>
                     <div class="pitcher-stats-line">{{ away_pitcher.stats }}</div>
@@ -467,7 +459,7 @@
             {% for player in away_lineup %}
             <div class="player-row">
                 <div class="order-num">{{ loop.index }}</div>
-                <div class="pos-badge away-badge">{{ player.position }}</div>
+                <div class="pos-badge">{{ player.position }}</div>
                 <div class="player-info">
                     <div class="player-name-text {{ player.ops_trend }}">{{ player.name }}</div>
                     <div class="player-stats-line">{{ player.stats }}</div>
@@ -488,7 +480,7 @@
 
             <!-- Pitcher -->
             <div class="pitcher-row">
-                <div class="pitcher-badge home-badge">P</div>
+                <div class="pitcher-badge">P</div>
                 <div class="pitcher-info">
                     <div class="pitcher-name-text">{{ home_pitcher.name }}</div>
                     <div class="pitcher-stats-line">{{ home_pitcher.stats }}</div>
@@ -502,7 +494,7 @@
             {% for player in home_lineup %}
             <div class="player-row">
                 <div class="order-num">{{ loop.index }}</div>
-                <div class="pos-badge home-badge">{{ player.position }}</div>
+                <div class="pos-badge">{{ player.position }}</div>
                 <div class="player-info">
                     <div class="player-name-text {{ player.ops_trend }}">{{ player.name }}</div>
                     <div class="player-stats-line">{{ player.stats }}</div>

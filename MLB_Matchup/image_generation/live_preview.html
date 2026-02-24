@@ -204,17 +204,13 @@
         .home-column .pitcher-row { flex-direction: row-reverse; }
 
         .pitcher-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
             font-family: 'WorkSans-Bold', sans-serif;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
+            color: #111;
             flex-shrink: 0;
-            letter-spacing: 0;
+            width: 36px;
+            text-align: center;
         }
 
         .away-badge {
@@ -325,17 +321,13 @@
         .home-column .order-num { margin-left: 10px; }
 
         .pos-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 6px;
             font-family: 'WorkSans-Bold', sans-serif;
-            font-size: 16px;
+            font-size: 22px;
             font-weight: bold;
+            color: #111;
             flex-shrink: 0;
-            letter-spacing: 0;
+            width: 36px;
+            text-align: center;
         }
 
         .player-info {
@@ -453,7 +445,7 @@
 
             <!-- Pitcher -->
             <div class="pitcher-row">
-                <div class="pitcher-badge away-badge">P</div>
+                <div class="pitcher-badge">P</div>
                 <div class="pitcher-info">
                     <div class="pitcher-name-text">Tyler Glasnow</div>
                     <div class="pitcher-stats-line">ERA: 3.47 | WHIP: 0.95 | K: 18 | IP: 13.0</div>
@@ -467,7 +459,7 @@
             
             <div class="player-row">
                 <div class="order-num">1</div>
-                <div class="pos-badge away-badge">RF</div>
+                <div class="pos-badge">RF</div>
                 <div class="player-info">
                     <div class="player-name-text hot">Mookie Betts</div>
                     <div class="player-stats-line">AVG: 0.289 | OPS: 0.872 | H: 7 | RBIs: 4 | SO: 3</div>
@@ -479,7 +471,7 @@
             
             <div class="player-row">
                 <div class="order-num">2</div>
-                <div class="pos-badge away-badge">DH</div>
+                <div class="pos-badge">DH</div>
                 <div class="player-info">
                     <div class="player-name-text hot">Shohei Ohtani</div>
                     <div class="player-stats-line">AVG: 0.315 | OPS: 1.036 | H: 9 | RBIs: 8 | SO: 2</div>
@@ -491,7 +483,7 @@
             
             <div class="player-row">
                 <div class="order-num">3</div>
-                <div class="pos-badge away-badge">1B</div>
+                <div class="pos-badge">1B</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Freddie Freeman</div>
                     <div class="player-stats-line">AVG: 0.298 | OPS: 0.891 | H: 8 | RBIs: 6 | SO: 1</div>
@@ -503,7 +495,7 @@
             
             <div class="player-row">
                 <div class="order-num">4</div>
-                <div class="pos-badge away-badge">C</div>
+                <div class="pos-badge">C</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Will Smith</div>
                     <div class="player-stats-line">AVG: 0.267 | OPS: 0.823 | H: 6 | RBIs: 5 | SO: 4</div>
@@ -515,7 +507,7 @@
             
             <div class="player-row">
                 <div class="order-num">5</div>
-                <div class="pos-badge away-badge">3B</div>
+                <div class="pos-badge">3B</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Max Muncy</div>
                     <div class="player-stats-line">AVG: 0.245 | OPS: 0.798 | H: 5 | RBIs: 7 | SO: 5</div>
@@ -527,7 +519,7 @@
             
             <div class="player-row">
                 <div class="order-num">6</div>
-                <div class="pos-badge away-badge">LF</div>
+                <div class="pos-badge">LF</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Teoscar Hernandez</div>
                     <div class="player-stats-line">AVG: 0.272 | OPS: 0.845 | H: 7 | RBIs: 6 | SO: 6</div>
@@ -539,7 +531,7 @@
             
             <div class="player-row">
                 <div class="order-num">7</div>
-                <div class="pos-badge away-badge">2B</div>
+                <div class="pos-badge">2B</div>
                 <div class="player-info">
                     <div class="player-name-text cold">Gavin Lux</div>
                     <div class="player-stats-line">AVG: 0.251 | OPS: 0.734 | H: 5 | RBIs: 3 | SO: 3</div>
@@ -551,7 +543,7 @@
             
             <div class="player-row">
                 <div class="order-num">8</div>
-                <div class="pos-badge away-badge">SS</div>
+                <div class="pos-badge">SS</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Miguel Rojas</div>
                     <div class="player-stats-line">AVG: 0.283 | OPS: 0.712 | H: 6 | RBIs: 2 | SO: 2</div>
@@ -563,7 +555,7 @@
             
             <div class="player-row">
                 <div class="order-num">9</div>
-                <div class="pos-badge away-badge">CF</div>
+                <div class="pos-badge">CF</div>
                 <div class="player-info">
                     <div class="player-name-text cold">James Outman</div>
                     <div class="player-stats-line">AVG: 0.248 | OPS: 0.701 | H: 4 | RBIs: 3 | SO: 7</div>
@@ -584,7 +576,7 @@
 
             <!-- Pitcher -->
             <div class="pitcher-row">
-                <div class="pitcher-badge home-badge">P</div>
+                <div class="pitcher-badge">P</div>
                 <div class="pitcher-info">
                     <div class="pitcher-name-text">Gerrit Cole</div>
                     <div class="pitcher-stats-line">ERA: 2.89 | WHIP: 1.02 | K: 21 | IP: 15.2</div>
@@ -598,7 +590,7 @@
             
             <div class="player-row">
                 <div class="order-num">1</div>
-                <div class="pos-badge home-badge">2B</div>
+                <div class="pos-badge">2B</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Gleyber Torres</div>
                     <div class="player-stats-line">AVG: 0.279 | OPS: 0.756 | H: 6 | RBIs: 4 | SO: 4</div>
@@ -610,7 +602,7 @@
             
             <div class="player-row">
                 <div class="order-num">2</div>
-                <div class="pos-badge home-badge">RF</div>
+                <div class="pos-badge">RF</div>
                 <div class="player-info">
                     <div class="player-name-text hot">Juan Soto</div>
                     <div class="player-stats-line">AVG: 0.288 | OPS: 0.989 | H: 8 | RBIs: 9 | SO: 3</div>
@@ -622,7 +614,7 @@
             
             <div class="player-row">
                 <div class="order-num">3</div>
-                <div class="pos-badge home-badge">CF</div>
+                <div class="pos-badge">CF</div>
                 <div class="player-info">
                     <div class="player-name-text hot">Aaron Judge</div>
                     <div class="player-stats-line">AVG: 0.301 | OPS: 1.125 | H: 9 | RBIs: 11 | SO: 5</div>
@@ -634,7 +626,7 @@
             
             <div class="player-row">
                 <div class="order-num">4</div>
-                <div class="pos-badge home-badge">DH</div>
+                <div class="pos-badge">DH</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Giancarlo Stanton</div>
                     <div class="player-stats-line">AVG: 0.243 | OPS: 0.812 | H: 5 | RBIs: 8 | SO: 8</div>
@@ -646,7 +638,7 @@
             
             <div class="player-row">
                 <div class="order-num">5</div>
-                <div class="pos-badge home-badge">1B</div>
+                <div class="pos-badge">1B</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Anthony Rizzo</div>
                     <div class="player-stats-line">AVG: 0.256 | OPS: 0.721 | H: 5 | RBIs: 5 | SO: 6</div>
@@ -658,7 +650,7 @@
             
             <div class="player-row">
                 <div class="order-num">6</div>
-                <div class="pos-badge home-badge">3B</div>
+                <div class="pos-badge">3B</div>
                 <div class="player-info">
                     <div class="player-name-text cold">DJ LeMahieu</div>
                     <div class="player-stats-line">AVG: 0.271 | OPS: 0.698 | H: 6 | RBIs: 3 | SO: 2</div>
@@ -670,7 +662,7 @@
             
             <div class="player-row">
                 <div class="order-num">7</div>
-                <div class="pos-badge home-badge">LF</div>
+                <div class="pos-badge">LF</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Alex Verdugo</div>
                     <div class="player-stats-line">AVG: 0.265 | OPS: 0.734 | H: 6 | RBIs: 4 | SO: 3</div>
@@ -682,7 +674,7 @@
             
             <div class="player-row">
                 <div class="order-num">8</div>
-                <div class="pos-badge home-badge">C</div>
+                <div class="pos-badge">C</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Jose Trevino</div>
                     <div class="player-stats-line">AVG: 0.241 | OPS: 0.645 | H: 4 | RBIs: 2 | SO: 4</div>
@@ -694,7 +686,7 @@
             
             <div class="player-row">
                 <div class="order-num">9</div>
-                <div class="pos-badge home-badge">SS</div>
+                <div class="pos-badge">SS</div>
                 <div class="player-info">
                     <div class="player-name-text neutral">Anthony Volpe</div>
                     <div class="player-stats-line">AVG: 0.258 | OPS: 0.712 | H: 5 | RBIs: 3 | SO: 7</div>

@@ -69,11 +69,11 @@ def main():
         print(f"Tweet attempt {attempt} failed: {tweet_response.status_code} — retrying in {attempt * 5}s")
         time.sleep(attempt * 5)
 
-    if not tweet_response or tweet_response.status_code != 201:
+    if tweet_response is None or tweet_response.status_code != 201:
         raise Exception(
             "Request returned an error: {} {}".format(
-                tweet_response.status_code if tweet_response else "no response",
-                tweet_response.text if tweet_response else ""
+                tweet_response.status_code if tweet_response is not None else "no response",
+                tweet_response.text if tweet_response is not None else ""
             )
         )
 

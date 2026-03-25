@@ -62,6 +62,9 @@ class MLBAPIClient:
             end_date=yesterday
         )
 
+        # Filter to regular season games only — excludes spring training (S), postseason, etc.
+        schedule = [g for g in schedule if g.get('game_type') == 'R']
+
         # Store in session cache
         self._team_schedule_cache[cache_key] = schedule
         return schedule

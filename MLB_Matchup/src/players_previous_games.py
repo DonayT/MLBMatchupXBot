@@ -17,7 +17,9 @@ params: player_name (str) - Full name of the player (e.g., 'Shohei Ohtani')
 returns: dict - Player's last 5 games statline with keys: avg, hits, rbi, games, obp, slg, so
 summary: Get the last 5 completed games stats for a player including OPS components
 """
-def get_player_last_5_games(player_name, team_id=119, season=2025, team_schedule=None):
+def get_player_last_5_games(player_name, team_id=119, season=None, team_schedule=None):
+    if season is None:
+        season = datetime.now().year
     cache = get_cache()
 
     # Use cache for player lookup
@@ -213,7 +215,9 @@ params: player_name (str) - Full name of the pitcher (e.g., 'Logan Gilbert')
 returns: dict - Pitcher's last 3 games statline with keys: era, whip, k, ip, games
 summary: Get the last 3 completed games stats for a pitcher
 """
-def get_pitcher_last_3_games(player_name, team_id=119, season=2025, team_schedule=None):
+def get_pitcher_last_3_games(player_name, team_id=119, season=None, team_schedule=None):
+    if season is None:
+        season = datetime.now().year
     cache = get_cache()
 
     # Use cache for player lookup
